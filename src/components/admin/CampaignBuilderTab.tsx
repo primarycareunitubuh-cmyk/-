@@ -111,6 +111,16 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
   const [editCampGoal, setEditCampGoal] = useState<number>(85);
   const [editCampThankYou, setEditCampThankYou] = useState('');
 
+  // Toast notification state for real-time operations
+  const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'info' | 'error' } | null>(null);
+
+  const showToast = (text: string, type: 'success' | 'info' | 'error' = 'success') => {
+    setToastMessage({ text, type });
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 4000);
+  };
+
   // Delete Campaign confirmation modal state
   const [campaignToDelete, setCampaignToDelete] = useState<Campaign | null>(null);
 
@@ -157,7 +167,7 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
           startDate: editCampStartDate,
           endDate: editCampEndDate,
           targetGoalPercent: editCampGoal,
-          thankYouMessage: editCampThankYou.trim() || undefined,
+          thankYouMessage: editCampThankYou.trim() || 'ขอบพระคุณสำหรับความคิดเห็นของท่าน',
         };
       }
       return c;
@@ -165,6 +175,7 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
 
     onUpdateCampaigns(updated);
     setEditingCampaign(null);
+    showToast('✓ บันทึกการแก้ไขข้อมูลชุดแบบประเมินและสถานะเรียบร้อยแล้ว', 'success');
   };
 
   // Quick toggle status for any campaign
@@ -172,6 +183,12 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
     const nextStatus: 'active' | 'paused' = camp.status === 'active' ? 'paused' : 'active';
     const updated = campaigns.map(c => c.id === camp.id ? { ...c, status: nextStatus } : c);
     onUpdateCampaigns(updated);
+    showToast(
+      nextStatus === 'active' 
+        ? `✓ เปิดใช้งาน "${camp.title}" เรียบร้อยแล้ว (ผู้รับบริการสามารถเข้าทำแบบประเมินได้)` 
+        : `✓ ปิดระบบ "${camp.title}" เรียบร้อยแล้ว (งดรับแบบประเมินชั่วคราว)`,
+      'info'
+    );
   };
 
   // Confirm delete campaign
@@ -184,6 +201,7 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
     }
 
     const campId = campaignToDelete.id;
+    const title = campaignToDelete.title;
     if (onDeleteCampaign) {
       onDeleteCampaign(campId);
     } else {
@@ -194,6 +212,7 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
       }
     }
     setCampaignToDelete(null);
+    showToast(`✓ ลบชุดแบบประเมิน "${title}" ออกจากระบบเรียลไทม์แล้ว`, 'info');
   };
 
   // New/Edit Question Form
@@ -345,6 +364,8 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
     e.preventDefault();
     if (!qText.trim()) return;
 
+    const trimmedDesc = qDesc.trim();
+
     if (editingQuestion) {
       // update
       updateCurrentCampaign(camp => ({
@@ -357,12 +378,13 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
                 category: qCategory,
                 type: qType,
                 required: qRequired,
-                description: qDesc.trim() || undefined,
+                description: trimmedDesc,
               }
             : q
         ),
       }));
       setEditingQuestion(null);
+      showToast('✓ บันทึกการแก้ไขข้อคำถามสำเร็จและซิงค์เรียลไทม์แล้ว', 'success');
     } else {
       // create new
       const newQuestion: Question = {
@@ -372,13 +394,14 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
         type: qType,
         required: qRequired,
         order: currentCampaign.questions.length + 1,
-        description: qDesc.trim() || undefined,
+        description: trimmedDesc,
       };
       updateCurrentCampaign(camp => ({
         ...camp,
         questions: [...camp.questions, newQuestion],
       }));
       setShowNewQuestionModal(false);
+      showToast('✓ เพิ่มข้อคำถามใหม่สำเร็จและเชื่อมต่อเรียลไทม์แล้ว (ผู้รับบริการจะเห็นทันที)', 'success');
     }
 
     setQText('');
@@ -405,6 +428,7 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
         ...camp,
         questions: camp.questions.filter(q => q.id !== questionId),
       }));
+      showToast('✓ ลบข้อคำถามออกจากแบบประเมินเรียลไทม์สำเร็จ', 'info');
     }
   };
 
@@ -424,6 +448,7 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
       ...camp,
       questions: reordered,
     }));
+    showToast('✓ ปรับลำดับข้อคำถามเรียบร้อยแล้ว', 'info');
   };
 
   // Add from preset
@@ -435,17 +460,34 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
       type: preset.type,
       required: true,
       order: currentCampaign.questions.length + 1,
-      description: preset.description,
+      description: preset.description || '',
     };
     updateCurrentCampaign(camp => ({
       ...camp,
       questions: [...camp.questions, newQ],
     }));
+    showToast(`✓ เพิ่มข้อคำถามจากแม่แบบสำเร็จและซิงค์เรียลไทม์แล้ว`, 'success');
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 relative">
       
+      {/* Floating Real-Time Sync Notification Toast */}
+      {toastMessage && (
+        <div className="fixed top-20 right-4 sm:right-8 z-50 animate-bounce">
+          <div className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs sm:text-sm font-semibold border shadow-xl backdrop-blur-md ${
+            toastMessage.type === 'success'
+              ? 'bg-emerald-900/95 text-white border-emerald-500 shadow-emerald-950/40'
+              : toastMessage.type === 'error'
+              ? 'bg-rose-900/95 text-white border-rose-500 shadow-rose-950/40'
+              : 'bg-slate-900/95 text-white border-slate-700 shadow-slate-950/40'
+          }`}>
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
+            <span>{toastMessage.text}</span>
+          </div>
+        </div>
+      )}
+
       {/* 1. Campaign Selection & Creation Bar */}
       <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-4 pb-4 border-b border-slate-100">

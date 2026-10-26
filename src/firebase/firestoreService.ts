@@ -16,6 +16,30 @@ const SUBMISSIONS_COLLECTION = 'submissions';
 const SETTINGS_COLLECTION = 'settings';
 
 /**
+ * Deep cleans an object/array to remove any undefined properties
+ * before saving to Firestore, preventing runtime exceptions like:
+ * "Unsupported field value: undefined"
+ */
+export function cleanForFirestore<T>(data: T): T {
+  if (data === undefined) {
+    return null as any;
+  }
+  if (data === null || typeof data !== 'object') {
+    return data;
+  }
+  if (Array.isArray(data)) {
+    return data.map((item) => cleanForFirestore(item)) as any;
+  }
+  const cleanObj: Record<string, any> = {};
+  for (const [key, val] of Object.entries(data)) {
+    if (val !== undefined) {
+      cleanObj[key] = cleanForFirestore(val);
+    }
+  }
+  return cleanObj as T;
+}
+
+/**
  * Seed initial campaigns to Firestore if the collection is currently empty
  */
 async function seedInitialCampaignsIfEmpty() {
@@ -26,7 +50,7 @@ async function seedInitialCampaignsIfEmpty() {
       const batch = writeBatch(db);
       for (const camp of INITIAL_CAMPAIGNS) {
         const ref = doc(db, CAMPAIGNS_COLLECTION, camp.id);
-        batch.set(ref, camp);
+        batch.set(ref, cleanForFirestore(camp));
       }
       await batch.commit();
       console.log('Initial campaigns seeded successfully.');
@@ -74,7 +98,14 @@ export function subscribeToRealtimeCampaigns(
       if (!snapshot.empty) {
         const list: Campaign[] = [];
         snapshot.forEach((docSnap) => {
-          list.push(docSnap.data() as Campaign);
+          const data = docSnap.data() as Campaign;
+          const questions = Array.isArray(data.questions) ? data.questions : [];
+          // Ensure questions are cleanly preserved and ordered
+          questions.sort((a, b) => (a.order || 0) - (b.order || 0));
+          list.push({
+            ...data,
+            questions,
+          });
         });
         onUpdate(list);
       } else {
@@ -151,31 +182,47 @@ export function subscribeToActiveCampaignId(
 export async function saveCampaignRemote(campaign: Campaign): Promise<void> {
   try {
     const docRef = doc(db, CAMPAIGNS_COLLECTION, campaign.id);
-    await setDoc(docRef, {
+    const cleaned = cleanForFirestore({
       ...campaign,
       updatedAt: new Date().toISOString(),
-    }, { merge: true });
+    });
+    await setDoc(docRef, cleaned, { merge: true });
   } catch (error) {
+    console.error('Failed to save campaign remotely:', error);
     handleFirestoreError(error, OperationType.WRITE, `${CAMPAIGNS_COLLECTION}/${campaign.id}`);
   }
 }
 
 /**
- * Save multiple campaigns to Firestore
+ * Save multiple campaigns to Firestore with batch and individual fallback
  */
 export async function saveCampaignsRemote(campaigns: Campaign[]): Promise<void> {
   try {
     const batch = writeBatch(db);
     for (const c of campaigns) {
       const ref = doc(db, CAMPAIGNS_COLLECTION, c.id);
-      batch.set(ref, {
+      const cleaned = cleanForFirestore({
         ...c,
         updatedAt: new Date().toISOString(),
-      }, { merge: true });
+      });
+      batch.set(ref, cleaned, { merge: true });
     }
     await batch.commit();
   } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, CAMPAIGNS_COLLECTION);
+    console.warn('Batch write failed, trying individual setDoc fallback:', error);
+    try {
+      for (const c of campaigns) {
+        const ref = doc(db, CAMPAIGNS_COLLECTION, c.id);
+        const cleaned = cleanForFirestore({
+          ...c,
+          updatedAt: new Date().toISOString(),
+        });
+        await setDoc(ref, cleaned, { merge: true });
+      }
+    } catch (innerError) {
+      console.error('Fallback save also failed:', innerError);
+      handleFirestoreError(innerError, OperationType.WRITE, CAMPAIGNS_COLLECTION);
+    }
   }
 }
 

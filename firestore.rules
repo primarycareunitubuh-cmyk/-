@@ -16,12 +16,18 @@ service cloud.firestore {
 
     function isValidCampaign(data) {
       return data.id is string && data.id.size() <= 128
-        && data.title is string && data.title.size() <= 200
-        && data.code is string && data.code.size() <= 50
-        && data.targetUnit is string && data.targetUnit.size() <= 200
+        && data.title is string && data.title.size() <= 500
+        && data.code is string && data.code.size() <= 100
+        && (!('targetUnit' in data) || (data.targetUnit is string && data.targetUnit.size() <= 500))
+        && (!('subtitle' in data) || (data.subtitle is string && data.subtitle.size() <= 500))
         && data.status in ['active', 'paused', 'archived']
-        && (!('description' in data) || (data.description is string && data.description.size() <= 1000))
-        && (!('thankYouMessage' in data) || (data.thankYouMessage is string && data.thankYouMessage.size() <= 500));
+        && (!('description' in data) || (data.description is string && data.description.size() <= 3000))
+        && (!('thankYouMessage' in data) || (data.thankYouMessage is string && data.thankYouMessage.size() <= 2000))
+        && (!('welcomeMessage' in data) || (data.welcomeMessage is string && data.welcomeMessage.size() <= 2000))
+        && (!('questions' in data) || data.questions is list)
+        && (!('criteria' in data) || data.criteria is list)
+        && (!('startDate' in data) || (data.startDate is string && data.startDate.size() <= 50))
+        && (!('endDate' in data) || (data.endDate is string && data.endDate.size() <= 50));
     }
 
     function isValidSubmission(data) {

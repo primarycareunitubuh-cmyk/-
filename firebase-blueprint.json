@@ -6,17 +6,17 @@
       "type": "object",
       "properties": {
         "id": { "type": "string", "maxLength": 128 },
-        "title": { "type": "string", "maxLength": 200 },
-        "code": { "type": "string", "maxLength": 50 },
-        "targetUnit": { "type": "string", "maxLength": 200 },
-        "description": { "type": "string", "maxLength": 1000 },
+        "title": { "type": "string", "maxLength": 500 },
+        "code": { "type": "string", "maxLength": 100 },
+        "targetUnit": { "type": "string", "maxLength": 500 },
+        "description": { "type": "string", "maxLength": 3000 },
         "status": { "type": "string", "enum": ["active", "paused", "archived"] },
         "questions": { "type": "array" },
         "scoringCriteria": { "type": "array" },
-        "thankYouMessage": { "type": "string", "maxLength": 500 },
+        "thankYouMessage": { "type": "string", "maxLength": 2000 },
         "updatedAt": { "type": "string", "maxLength": 50 }
       },
-      "required": ["id", "title", "code", "targetUnit", "status"]
+      "required": ["id", "title", "code", "status"]
     },
     "SurveySubmission": {
       "title": "SurveySubmission",

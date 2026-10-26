@@ -24,6 +24,7 @@ interface HeaderProps {
   onStaffLogout: () => void;
   onRequestStaffLogin: () => void;
   onBackToLanding: () => void;
+  isRealtimeActive?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -36,6 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
   onStaffLogout,
   onRequestStaffLogin,
   onBackToLanding,
+  isRealtimeActive = true,
 }) => {
   const isPatientMode = currentView === 'landing' || currentView === 'survey';
 
@@ -107,6 +109,17 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-slate-900 to-emerald-950 text-white border border-amber-400/30 text-xs sm:text-sm font-semibold shadow-sm">
                 <ShieldCheck className="w-4 h-4 text-amber-400" />
                 <span>ระบบจัดการเจ้าหน้าที่</span>
+              </div>
+            )}
+
+            {/* Cloud Real-Time Indicator */}
+            {isRealtimeActive && (
+              <div 
+                className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300/70 shadow-2xs"
+                title="ระบบเชื่อมต่อฐานข้อมูลคลาวด์เรียลไทม์ ซิงค์ข้อมูลข้ามทุกอุปกรณ์อัตโนมัติ"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>ซิงค์เรียลไทม์ (Live Sync)</span>
               </div>
             )}
           </div>

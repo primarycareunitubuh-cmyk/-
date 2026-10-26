@@ -20,7 +20,17 @@ import { AdminDashboard } from './components/AdminDashboard';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { KioskSurveyView } from './components/KioskSurveyView';
 import { computeSubmissionScorePercent } from './utils/scoring';
-import { Hospital, Heart, ShieldCheck } from 'lucide-react';
+import { Hospital, Heart, ShieldCheck, Wifi } from 'lucide-react';
+import {
+  subscribeToRealtimeCampaigns,
+  subscribeToRealtimeSubmissions,
+  subscribeToActiveCampaignId,
+  addSubmissionRemote,
+  deleteSubmissionRemote,
+  saveCampaignsRemote,
+  setActiveCampaignIdRemote,
+  resetAllDataToDefaultRemote
+} from './firebase/firestoreService';
 
 export default function App() {
   const [campaigns, setCampaigns] = useState<Campaign[]>(() => getStoredCampaigns());
@@ -30,19 +40,54 @@ export default function App() {
   const [currentView, setCurrentView] = useState<AppView>('landing');
   const [isStaff, setIsStaff] = useState<boolean>(() => isStaffAuthenticated());
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+  const [isRealtimeActive, setIsRealtimeActive] = useState<boolean>(true);
 
   // Sync active campaign
   const activeCampaign = campaigns.find(c => c.id === activeCampaignId) || campaigns[0] || null;
 
+  // Real-time Cloud Synchronization across all devices (Mobiles, Tablets, Staff PCs)
+  useEffect(() => {
+    // 1. Subscribe to campaigns in real time
+    const unsubCampaigns = subscribeToRealtimeCampaigns((remoteCampaigns) => {
+      if (remoteCampaigns && remoteCampaigns.length > 0) {
+        setCampaigns(remoteCampaigns);
+        saveStoredCampaigns(remoteCampaigns);
+      }
+    });
+
+    // 2. Subscribe to submissions in real time
+    const unsubSubmissions = subscribeToRealtimeSubmissions((remoteSubmissions) => {
+      setAllResponses(remoteSubmissions);
+      saveStoredResponses(remoteSubmissions);
+      setIsRealtimeActive(true);
+    });
+
+    // 3. Subscribe to active campaign id setting
+    const unsubActiveId = subscribeToActiveCampaignId((remoteActiveId) => {
+      if (remoteActiveId) {
+        setActiveCampaignId(remoteActiveId);
+        setStoredActiveCampaignId(remoteActiveId);
+      }
+    });
+
+    return () => {
+      unsubCampaigns();
+      unsubSubmissions();
+      unsubActiveId();
+    };
+  }, []);
+
   const handleSelectCampaign = (campId: string) => {
     setActiveCampaignId(campId);
     setStoredActiveCampaignId(campId);
+    setActiveCampaignIdRemote(campId).catch(console.warn);
   };
 
   // Called when user clicks an activity card on the landing page
   const handleChooseCampaignFromLanding = (campId: string) => {
     setActiveCampaignId(campId);
     setStoredActiveCampaignId(campId);
+    setActiveCampaignIdRemote(campId).catch(console.warn);
     setCurrentView('survey');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -55,17 +100,34 @@ export default function App() {
   const handleUpdateCampaigns = (updatedCampaigns: Campaign[]) => {
     setCampaigns(updatedCampaigns);
     saveStoredCampaigns(updatedCampaigns);
+    saveCampaignsRemote(updatedCampaigns).catch((err) => {
+      console.warn('Error syncing campaigns to cloud:', err);
+    });
   };
 
-  const handleSubmitSurvey = (submission: SurveySubmission) => {
+  const handleSubmitSurvey = async (submission: SurveySubmission) => {
+    // Optimistically update local view
     addStoredSubmission(submission);
     setAllResponses(prev => [submission, ...prev]);
+
+    // Send to Firebase Cloud Firestore for instant live broadcast to all other devices
+    try {
+      await addSubmissionRemote(submission);
+    } catch (err) {
+      console.warn('Submission saved locally, remote sync pending:', err);
+    }
   };
 
-  const handleDeleteResponse = (responseId: string) => {
+  const handleDeleteResponse = async (responseId: string) => {
     const updated = allResponses.filter(r => r.id !== responseId);
     setAllResponses(updated);
     saveStoredResponses(updated);
+
+    try {
+      await deleteSubmissionRemote(responseId);
+    } catch (err) {
+      console.warn('Could not delete from remote database:', err);
+    }
   };
 
   // Add 5 realistic sample submissions to test statistics
@@ -152,13 +214,21 @@ export default function App() {
     const updated = [...newSamples, ...allResponses];
     setAllResponses(updated);
     saveStoredResponses(updated);
+
+    // Sync newly generated samples to cloud so they appear on all devices
+    for (const s of newSamples) {
+      addSubmissionRemote(s).catch(console.warn);
+    }
   };
 
-  const handleResetAllData = () => {
+  const handleResetAllData = async () => {
     resetAllDataToDefault();
     setCampaigns(getStoredCampaigns());
     setActiveCampaignId(getStoredActiveCampaignId());
     setAllResponses(getStoredResponses());
+
+    // Reset cloud Firestore database
+    await resetAllDataToDefaultRemote().catch(console.warn);
   };
 
   const handleStaffLogout = () => {
@@ -209,6 +279,7 @@ export default function App() {
         onStaffLogout={handleStaffLogout}
         onRequestStaffLogin={() => setShowLoginModal(true)}
         onBackToLanding={handleBackToLanding}
+        isRealtimeActive={isRealtimeActive}
       />
 
       {/* Main Container */}

@@ -1,0 +1,61 @@
+{
+  "entities": {
+    "Campaign": {
+      "title": "Campaign",
+      "description": "Health checkup survey campaign or project",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "code": { "type": "string", "maxLength": 50 },
+        "targetUnit": { "type": "string", "maxLength": 200 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "status": { "type": "string", "enum": ["active", "paused", "archived"] },
+        "questions": { "type": "array" },
+        "scoringCriteria": { "type": "array" },
+        "thankYouMessage": { "type": "string", "maxLength": 500 },
+        "updatedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "title", "code", "targetUnit", "status"]
+    },
+    "SurveySubmission": {
+      "title": "SurveySubmission",
+      "description": "Completed patient satisfaction survey response",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "campaignId": { "type": "string", "maxLength": 128 },
+        "submittedAt": { "type": "string", "maxLength": 50 },
+        "demographics": { "type": "object" },
+        "answers": { "type": "object" },
+        "overallScorePercent": { "type": "number" }
+      },
+      "required": ["id", "campaignId", "submittedAt", "answers", "overallScorePercent"]
+    },
+    "AppSetting": {
+      "title": "AppSetting",
+      "description": "Global settings such as active campaign id",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "value": { "type": "string", "maxLength": 200 },
+        "updatedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "value"]
+    }
+  },
+  "firestore": {
+    "/campaigns/{campaignId}": {
+      "schema": "Campaign",
+      "description": "Collection of all survey campaigns and question configurations"
+    },
+    "/submissions/{submissionId}": {
+      "schema": "SurveySubmission",
+      "description": "Real-time stream of patient satisfaction survey submissions"
+    },
+    "/settings/{settingId}": {
+      "schema": "AppSetting",
+      "description": "System state including current active campaign"
+    }
+  }
+}

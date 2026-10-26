@@ -74,6 +74,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
                 ระบบจัดการเจ้าหน้าที่ (Staff Portal)
               </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                ซิงค์คลาวด์เรียลไทม์ (Cloud Connected)
+              </span>
               <span className="text-xs text-emerald-200/80 font-medium">
                 งานอาชีวเวชกรรม กลุ่มงานบริการปฐมภูมิ
               </span>

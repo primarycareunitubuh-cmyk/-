@@ -180,6 +180,18 @@ export async function saveCampaignsRemote(campaigns: Campaign[]): Promise<void> 
 }
 
 /**
+ * Delete a campaign permanently from Firestore
+ */
+export async function deleteCampaignRemote(campaignId: string): Promise<void> {
+  try {
+    const docRef = doc(db, CAMPAIGNS_COLLECTION, campaignId);
+    await deleteDoc(docRef);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${CAMPAIGNS_COLLECTION}/${campaignId}`);
+  }
+}
+
+/**
  * Add a new survey submission (patient response) to Firestore
  * All connected staff dashboards will instantly receive and render this!
  */

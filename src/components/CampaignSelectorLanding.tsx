@@ -12,9 +12,13 @@ import {
   Sparkles,
   ShieldCheck,
   ChevronRight,
-  UserCheck
+  UserCheck,
+  Lock,
+  AlertCircle,
+  X
 } from 'lucide-react';
 import { Campaign } from '../types';
+import { checkCampaignStatus, formatThaiDate } from '../utils/campaignHelper';
 
 interface CampaignSelectorLandingProps {
   campaigns: Campaign[];
@@ -32,6 +36,7 @@ export const CampaignSelectorLanding: React.FC<CampaignSelectorLandingProps> = (
   onGoToAdmin,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [closedNoticeCampaign, setClosedNoticeCampaign] = useState<Campaign | null>(null);
 
   const filteredCampaigns = campaigns.filter(camp => {
     const matchesSearch = 
@@ -130,17 +135,27 @@ export const CampaignSelectorLanding: React.FC<CampaignSelectorLandingProps> = (
           {filteredCampaigns.map((camp) => {
             const theme = getCampaignTheme(camp);
             const questionCount = camp.questions?.length || 0;
-            const isActive = camp.status === 'active';
+            const statusCheck = checkCampaignStatus(camp);
+
+            const handleCardClick = () => {
+              if (statusCheck.isOpen) {
+                onSelectCampaign(camp.id);
+              } else {
+                setClosedNoticeCampaign(camp);
+              }
+            };
 
             return (
               <div
                 key={camp.id}
-                onClick={() => onSelectCampaign(camp.id)}
-                className={`group relative bg-gradient-to-b from-white via-white to-emerald-50/20 rounded-3xl p-6 sm:p-7 border-2 border-slate-200/80 shadow-xs hover:shadow-xl hover:border-emerald-300/90 transition-all duration-300 cursor-pointer flex flex-col justify-between ${theme.hoverBorder} hover:-translate-y-1.5`}
+                onClick={handleCardClick}
+                className={`group relative bg-gradient-to-b from-white via-white to-emerald-50/20 rounded-3xl p-6 sm:p-7 border-2 border-slate-200/80 shadow-xs hover:shadow-xl hover:border-emerald-300/90 transition-all duration-300 cursor-pointer flex flex-col justify-between ${
+                  statusCheck.isOpen ? `${theme.hoverBorder} hover:-translate-y-1.5` : 'opacity-90 hover:border-slate-300'
+                }`}
               >
                 <div>
                   {/* Top Badges */}
-                  <div className="flex items-center justify-between gap-2 mb-4">
+                  <div className="flex items-center justify-between gap-2 mb-3.5">
                     <div className="flex items-center gap-2">
                       <div className={`w-11 h-11 rounded-2xl flex items-center justify-center border ${theme.iconBg} shadow-xs`}>
                         {getCampaignIcon(camp)}
@@ -150,25 +165,28 @@ export const CampaignSelectorLanding: React.FC<CampaignSelectorLandingProps> = (
                       </span>
                     </div>
 
-                    <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-2xs ${
-                      isActive 
-                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-300/80' 
-                        : 'bg-amber-50 text-amber-800 border border-amber-300/80'
-                    }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500 ring-2 ring-emerald-200' : 'bg-amber-500 ring-2 ring-amber-200'}`}></span>
-                      {isActive ? 'เปิดให้ประเมิน' : 'พักชั่วคราว'}
+                    {/* Status Badge */}
+                    <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-2xs ${statusCheck.badgeClass}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${statusCheck.dotClass} ${statusCheck.isOpen ? 'animate-pulse ring-2 ring-emerald-200' : ''}`} />
+                      <span>{statusCheck.statusLabel}</span>
                     </span>
                   </div>
 
                   {/* Campaign Title */}
-                  <h3 className="text-base sm:text-lg font-bold text-slate-900 font-['Prompt'] group-hover:text-emerald-900 transition-colors line-clamp-2 mb-2">
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 font-['Prompt'] group-hover:text-emerald-900 transition-colors line-clamp-2 mb-1.5">
                     {camp.title}
                   </h3>
 
                   {/* Target Unit */}
-                  <div className="flex items-center gap-1.5 text-xs text-emerald-800/80 font-medium mb-3">
+                  <div className="flex items-center gap-1.5 text-xs text-emerald-800/80 font-medium mb-2.5">
                     <Building className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                     <span className="truncate">{camp.targetUnit}</span>
+                  </div>
+
+                  {/* Scheduled Period */}
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mb-3 bg-slate-50/90 px-2.5 py-1 rounded-lg border border-slate-200/70">
+                    <Calendar className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span className="truncate">ช่วงเวลา: {formatThaiDate(camp.startDate)} - {formatThaiDate(camp.endDate)}</span>
                   </div>
 
                   {/* Description */}
@@ -190,13 +208,23 @@ export const CampaignSelectorLanding: React.FC<CampaignSelectorLandingProps> = (
                     </span>
                   </div>
 
-                  <button
-                    type="button"
-                    className={`w-full py-3 px-4 rounded-xl text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition shadow-md group-hover:shadow-lg ${theme.btnBg}`}
-                  >
-                    <span>เข้าทำแบบประเมิน</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </button>
+                  {statusCheck.isOpen ? (
+                    <button
+                      type="button"
+                      className={`w-full py-3 px-4 rounded-xl text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition shadow-md group-hover:shadow-lg ${theme.btnBg}`}
+                    >
+                      <span>เข้าทำแบบประเมิน</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="w-full py-3 px-4 rounded-xl text-slate-600 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition"
+                    >
+                      <Lock className="w-4 h-4 text-slate-500" />
+                      <span>{statusCheck.statusLabel} (คลิกดูรายละเอียด)</span>
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -243,6 +271,50 @@ export const CampaignSelectorLanding: React.FC<CampaignSelectorLandingProps> = (
         </div>
 
       </div>
+
+      {/* MODAL: Closed / Inactive Campaign Notice */}
+      {closedNoticeCampaign && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl shadow-xl border border-slate-200 w-full max-w-md overflow-hidden text-center p-6 sm:p-7 relative">
+            <button
+              onClick={() => setClosedNoticeCampaign(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-14 h-14 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-rose-200 shadow-xs">
+              <Lock className="w-7 h-7" />
+            </div>
+
+            <h3 className="text-lg font-bold text-slate-900 font-['Prompt'] mb-1.5">
+              ขออภัย กิจกรรมนี้ปิดรับการประเมิน
+            </h3>
+
+            <p className="text-xs font-semibold text-emerald-800 mb-4">
+              งานอาชีวเวชกรรม กลุ่มงานบริการปฐมภูมิ
+            </p>
+
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-left text-xs space-y-2 mb-5">
+              <p className="font-bold text-slate-900">{closedNoticeCampaign.title}</p>
+              <p className="text-slate-500 font-mono">รหัส: {closedNoticeCampaign.code}</p>
+              <div className="pt-2 border-t border-slate-200 text-rose-700 font-medium">
+                {checkCampaignStatus(closedNoticeCampaign).reason || 'กิจกรรมนี้ปิดระบบรับการประเมินชั่วคราว'}
+              </div>
+              <p className="text-slate-500 text-[11px]">
+                ช่วงเวลาที่กำหนด: {formatThaiDate(closedNoticeCampaign.startDate)} - {formatThaiDate(closedNoticeCampaign.endDate)}
+              </p>
+            </div>
+
+            <button
+              onClick={() => setClosedNoticeCampaign(null)}
+              className="w-full py-3 px-4 rounded-xl text-white font-semibold bg-emerald-700 hover:bg-emerald-800 shadow-md text-xs sm:text-sm transition"
+            >
+              เลือกกิจกรรมตรวจสุขภาพอื่นที่เปิดให้บริการ
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

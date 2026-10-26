@@ -25,11 +25,14 @@ import {
   Shield,
   History,
   ArrowLeft,
-  LayoutGrid
+  LayoutGrid,
+  Lock,
+  Calendar
 } from 'lucide-react';
 import { Campaign, Question, RespondentDemographics, SurveySubmission } from '../types';
 import { STATION_INFO } from '../data/initialData';
 import { computeSubmissionScorePercent } from '../utils/scoring';
+import { checkCampaignStatus, formatThaiDate } from '../utils/campaignHelper';
 
 interface ClientSurveyViewProps {
   campaign: Campaign;
@@ -160,6 +163,63 @@ export const ClientSurveyView: React.FC<ClientSurveyViewProps> = ({
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const statusCheck = checkCampaignStatus(campaign);
+
+  if (!statusCheck.isOpen) {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-12 sm:py-16">
+        <div className="bg-white rounded-3xl p-8 sm:p-10 shadow-xl border border-slate-200 text-center relative overflow-hidden">
+          <div className="absolute -right-16 -top-16 w-48 h-48 bg-rose-50 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute -left-16 -bottom-16 w-48 h-48 bg-amber-50 rounded-full blur-2xl pointer-events-none" />
+
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-rose-50 border-2 border-rose-200 rounded-3xl mx-auto flex items-center justify-center text-rose-600 shadow-md shadow-rose-500/10 mb-5">
+            <Lock className="w-9 h-9" />
+          </div>
+
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border mb-3 ${statusCheck.badgeClass}`}>
+            <span className={`w-2 h-2 rounded-full ${statusCheck.dotClass}`} />
+            {statusCheck.statusLabel}
+          </span>
+
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-2 font-['Prompt']">
+            {campaign.title}
+          </h2>
+
+          <p className="text-sm text-slate-600 mb-6 max-w-md mx-auto leading-relaxed">
+            {statusCheck.reason || 'แบบประเมินสำหรับกิจกรรมนี้ปิดรับคำตอบอยู่ หรืออยู่นอกช่วงเวลาที่เปิดให้ประเมิน'}
+          </p>
+
+          {(campaign.startDate || campaign.endDate) && (
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-6 text-left max-w-sm mx-auto text-xs text-slate-600 space-y-1.5">
+              <div className="font-semibold text-slate-700 flex items-center gap-1.5 mb-1">
+                <Calendar className="w-4 h-4 text-emerald-600" />
+                กำหนดการช่วงเวลาประเมิน:
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>เริ่มเปิดระบบ:</span>
+                <span className="font-medium text-slate-800">{formatThaiDate(campaign.startDate) || 'ไม่ระบุ'}</span>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>สิ้นสุดกำหนด:</span>
+                <span className="font-medium text-slate-800">{formatThaiDate(campaign.endDate) || 'ไม่ระบุ'}</span>
+              </div>
+            </div>
+          )}
+
+          {onBackToSelect && (
+            <button
+              onClick={onBackToSelect}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 shadow-md shadow-emerald-700/20 transition transform active:scale-98 text-sm"
+            >
+              <LayoutGrid className="w-4 h-4" />
+              <span>เลือกกิจกรรมตรวจสุขภาพอื่น</span>
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   if (submitted) {
     return (

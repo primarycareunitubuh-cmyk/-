@@ -22,6 +22,7 @@ interface AdminDashboardProps {
   activeCampaignId: string;
   onSelectCampaign: (id: string) => void;
   onUpdateCampaigns: (campaigns: Campaign[]) => void;
+  onDeleteCampaign?: (id: string) => void;
   allResponses: SurveySubmission[];
   onDeleteResponse: (id: string) => void;
   onAddSampleResponses: () => void;
@@ -36,6 +37,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   activeCampaignId,
   onSelectCampaign,
   onUpdateCampaigns,
+  onDeleteCampaign,
   allResponses,
   onDeleteResponse,
   onAddSampleResponses,
@@ -148,6 +150,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             activeCampaignId={currentCampaign.id}
             onSelectCampaign={onSelectCampaign}
             onUpdateCampaigns={onUpdateCampaigns}
+            onDeleteCampaign={onDeleteCampaign}
           />
         )}
 

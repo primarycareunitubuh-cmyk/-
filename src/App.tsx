@@ -28,6 +28,8 @@ import {
   addSubmissionRemote,
   deleteSubmissionRemote,
   saveCampaignsRemote,
+  saveCampaignRemote,
+  deleteCampaignRemote,
   setActiveCampaignIdRemote,
   resetAllDataToDefaultRemote
 } from './firebase/firestoreService';
@@ -103,6 +105,24 @@ export default function App() {
     saveCampaignsRemote(updatedCampaigns).catch((err) => {
       console.warn('Error syncing campaigns to cloud:', err);
     });
+  };
+
+  const handleDeleteCampaign = async (campId: string) => {
+    const updated = campaigns.filter(c => c.id !== campId);
+    setCampaigns(updated);
+    saveStoredCampaigns(updated);
+
+    if (activeCampaignId === campId && updated.length > 0) {
+      setActiveCampaignId(updated[0].id);
+      setStoredActiveCampaignId(updated[0].id);
+      setActiveCampaignIdRemote(updated[0].id).catch(console.warn);
+    }
+
+    try {
+      await deleteCampaignRemote(campId);
+    } catch (err) {
+      console.warn('Error deleting campaign from Firestore:', err);
+    }
   };
 
   const handleSubmitSurvey = async (submission: SurveySubmission) => {
@@ -311,6 +331,7 @@ export default function App() {
             activeCampaignId={activeCampaignId}
             onSelectCampaign={handleSelectCampaign}
             onUpdateCampaigns={handleUpdateCampaigns}
+            onDeleteCampaign={handleDeleteCampaign}
             allResponses={allResponses}
             onDeleteResponse={handleDeleteResponse}
             onAddSampleResponses={handleAddSampleResponses}

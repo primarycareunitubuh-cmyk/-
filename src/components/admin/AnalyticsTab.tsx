@@ -22,6 +22,7 @@ import {
 import { Campaign, SurveySubmission } from '../../types';
 import { calculateCampaignStats } from '../../utils/scoring';
 import { STATION_INFO, SERVICE_DIMENSIONS_LIST } from '../../data/initialData';
+import { getCampaignTheme } from '../../utils/campaignHelper';
 
 interface AnalyticsTabProps {
   campaign: Campaign;
@@ -35,6 +36,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [selectedStationFilter, setSelectedStationFilter] = useState<string>('all');
+  const campaignTheme = getCampaignTheme(campaign);
 
   const stats = calculateCampaignStats(campaign, allResponses, dateFrom, dateTo);
 
@@ -86,12 +88,23 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
   return (
     <div className="space-y-6">
       
-      {/* Filter Toolbar */}
+      {/* Activity Context Header & Filter Toolbar */}
       <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
+          {/* Active Activity Indicator Badge */}
+          <div className="flex items-center gap-2 pr-3 border-r border-slate-200">
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${campaignTheme.badgeBg}`}>
+              <Activity className="w-3.5 h-3.5" />
+              <span>{campaign.code}</span>
+            </span>
+            <span className={`hidden md:inline-flex text-[11px] font-semibold px-2 py-0.5 rounded border ${campaignTheme.chipClass}`}>
+              {campaignTheme.name.split(' ')[0]}
+            </span>
+          </div>
+
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-700">
             <Filter className="w-4 h-4 text-teal-600" />
-            <span>กรองสถิติย้อนหลัง:</span>
+            <span>กรองข้อมูล:</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -326,14 +339,25 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
           <div className="space-y-4 mt-4">
             {stats.stationStats.map((st) => {
               const isAboveGoal = st.percentageScore >= campaign.targetGoalPercent;
+              const dimMeta = STATION_INFO[st.station];
+              const isCustom = st.station.startsWith('custom:') || st.station === 'dimension_other';
+              const barGradient = dimMeta?.barGradient || (isCustom ? 'from-fuchsia-500 to-pink-600' : (isAboveGoal ? 'from-teal-500 to-emerald-500' : 'from-amber-400 to-orange-500'));
+              const badgeClass = isCustom 
+                ? 'bg-fuchsia-50 text-fuchsia-800 border border-fuchsia-300 font-medium' 
+                : (dimMeta?.badgeClass || 'bg-slate-100 text-slate-700');
+
               return (
                 <div key={st.station} className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
+                      <span 
+                        className="w-2.5 h-2.5 rounded-full shrink-0 ring-1 ring-slate-300" 
+                        style={{ backgroundColor: dimMeta?.hex || (isCustom ? '#c026d3' : '#0d9488') }} 
+                      />
                       <span className="text-xs sm:text-sm font-semibold text-slate-800">
                         {st.stationName}
                       </span>
-                      <span className="text-[10px] text-slate-400 bg-white px-2 py-0.5 rounded border border-slate-200">
+                      <span className={`text-[10px] px-2 py-0.5 rounded border ${badgeClass}`}>
                         {st.questionCount} คำถาม
                       </span>
                     </div>
@@ -345,12 +369,10 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
                     </div>
                   </div>
 
-                  {/* Station Progress Bar with Target Marker */}
+                  {/* Station Progress Bar with Distinct Color & Target Marker */}
                   <div className="relative w-full h-3 bg-slate-200 rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        isAboveGoal ? 'bg-gradient-to-r from-teal-500 to-emerald-500' : 'bg-gradient-to-r from-amber-400 to-orange-500'
-                      }`}
+                      className={`h-full rounded-full transition-all duration-500 bg-gradient-to-r ${barGradient}`}
                       style={{ width: `${Math.min(st.percentageScore, 100)}%` }}
                     />
                     {/* Goal Marker Line */}
@@ -502,9 +524,11 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
                 const isScored = item.question.type !== 'text';
                 const isCustom = item.question.category === 'dimension_other' || Boolean(item.question.customCategoryName) || !STATION_INFO[item.question.category];
                 const dimName = item.question.customCategoryName || STATION_INFO[item.question.category]?.nameTh || item.question.category;
+                const dimMeta = STATION_INFO[item.question.category];
                 const badgeClass = isCustom 
-                  ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' 
-                  : (STATION_INFO[item.question.category]?.badgeClass || 'bg-slate-100 text-slate-700');
+                  ? 'bg-fuchsia-50 text-fuchsia-800 border border-fuchsia-300 font-medium' 
+                  : (dimMeta?.badgeClass || 'bg-slate-100 text-slate-700 font-medium');
+                const barGradient = dimMeta?.barGradient || (isCustom ? 'from-fuchsia-500 to-pink-600' : 'from-teal-500 to-emerald-500');
                 const isAbove = item.percentageScore >= campaign.targetGoalPercent;
 
                 return (
@@ -546,9 +570,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
                       {isScored ? (
                         <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                           <div
-                            className={`h-full rounded-full ${
-                              isAbove ? 'bg-teal-500' : 'bg-amber-400'
-                            }`}
+                            className={`h-full rounded-full bg-gradient-to-r ${barGradient}`}
                             style={{ width: `${Math.min(item.percentageScore, 100)}%` }}
                           />
                         </div>

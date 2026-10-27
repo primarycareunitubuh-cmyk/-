@@ -18,7 +18,7 @@ import {
   X
 } from 'lucide-react';
 import { Campaign } from '../types';
-import { checkCampaignStatus, formatThaiDate } from '../utils/campaignHelper';
+import { checkCampaignStatus, formatThaiDate, getCampaignTheme } from '../utils/campaignHelper';
 
 interface CampaignSelectorLandingProps {
   campaigns: Campaign[];
@@ -47,43 +47,20 @@ export const CampaignSelectorLanding: React.FC<CampaignSelectorLandingProps> = (
     return matchesSearch;
   });
 
-  // Helper icon for campaign type
+  // Helper icon for campaign type with matching theme colors
   const getCampaignIcon = (camp: Campaign) => {
-    if (camp.code.includes('MOBILE') || camp.title.includes('เคลื่อนที่')) {
-      return <Truck className="w-6 h-6 text-emerald-600" />;
+    const code = (camp.code || '').toUpperCase();
+    const title = camp.title || '';
+    if (code.includes('MOBILE') || title.includes('เคลื่อนที่')) {
+      return <Truck className="w-6 h-6 text-blue-600" />;
     }
-    if (camp.code.includes('PRE') || camp.title.includes('เข้าทำงาน') || camp.title.includes('ใบรับรองแพทย์')) {
-      return <Stethoscope className="w-6 h-6 text-blue-600" />;
+    if (code.includes('PRE') || title.includes('เข้าทำงาน') || title.includes('ใบรับรองแพทย์')) {
+      return <Stethoscope className="w-6 h-6 text-amber-600" />;
     }
-    return <Calendar className="w-6 h-6 text-teal-600" />;
-  };
-
-  const getCampaignTheme = (camp: Campaign) => {
-    if (camp.code.includes('MOBILE') || camp.title.includes('เคลื่อนที่')) {
-      return {
-        badgeBg: 'bg-emerald-50 text-emerald-800 border-emerald-300',
-        iconBg: 'bg-gradient-to-br from-emerald-100 to-teal-100 border-emerald-300 text-emerald-700',
-        btnBg: 'bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 hover:from-emerald-800 hover:to-teal-800 focus:ring-emerald-500 shadow-emerald-700/25',
-        hoverBorder: 'hover:border-emerald-400 group-hover:text-emerald-800',
-        glowBg: 'from-emerald-500/5 to-transparent',
-      };
+    if (code.includes('ANNUAL') || title.includes('ประจำปี')) {
+      return <Calendar className="w-6 h-6 text-emerald-600" />;
     }
-    if (camp.code.includes('PRE') || camp.title.includes('เข้าทำงาน') || camp.title.includes('ใบรับรองแพทย์')) {
-      return {
-        badgeBg: 'bg-amber-50 text-amber-900 border-amber-300/80',
-        iconBg: 'bg-gradient-to-br from-amber-100 to-emerald-100 border-amber-300/80 text-amber-800',
-        btnBg: 'bg-gradient-to-r from-slate-900 via-emerald-900 to-teal-900 hover:from-slate-800 hover:to-emerald-800 focus:ring-teal-500 shadow-slate-900/20',
-        hoverBorder: 'hover:border-amber-400 group-hover:text-emerald-800',
-        glowBg: 'from-amber-500/5 to-transparent',
-      };
-    }
-    return {
-      badgeBg: 'bg-teal-50 text-teal-800 border-teal-300',
-      iconBg: 'bg-gradient-to-br from-teal-100 to-emerald-100 border-teal-300 text-teal-700',
-      btnBg: 'bg-gradient-to-r from-teal-700 via-emerald-700 to-teal-800 hover:from-teal-800 hover:to-emerald-800 focus:ring-teal-500 shadow-teal-700/25',
-      hoverBorder: 'hover:border-teal-400 group-hover:text-teal-800',
-      glowBg: 'from-teal-500/5 to-transparent',
-    };
+    return <Sparkles className="w-6 h-6 text-purple-600" />;
   };
 
   return (
@@ -149,24 +126,27 @@ export const CampaignSelectorLanding: React.FC<CampaignSelectorLandingProps> = (
               <div
                 key={camp.id}
                 onClick={handleCardClick}
-                className={`group relative bg-gradient-to-b from-white via-white to-emerald-50/20 rounded-3xl p-6 sm:p-7 border-2 border-slate-200/80 shadow-xs hover:shadow-xl hover:border-emerald-300/90 transition-all duration-300 cursor-pointer flex flex-col justify-between ${
-                  statusCheck.isOpen ? `${theme.hoverBorder} hover:-translate-y-1.5` : 'opacity-90 hover:border-slate-300'
+                className={`group relative bg-gradient-to-b ${theme.cardBgGradient} rounded-3xl p-6 sm:p-7 border-2 border-slate-200/80 shadow-xs hover:shadow-xl hover:border-slate-300 transition-all duration-300 cursor-pointer flex flex-col justify-between ${
+                  statusCheck.isOpen ? `${theme.borderHover} hover:-translate-y-1.5` : 'opacity-90 hover:border-slate-300'
                 }`}
               >
                 <div>
                   {/* Top Badges */}
                   <div className="flex items-center justify-between gap-2 mb-3.5">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <div className={`w-11 h-11 rounded-2xl flex items-center justify-center border ${theme.iconBg} shadow-xs`}>
                         {getCampaignIcon(camp)}
                       </div>
                       <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full border shadow-2xs ${theme.badgeBg}`}>
                         {camp.code}
                       </span>
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${theme.chipClass}`}>
+                        {theme.name.split(' ')[0]}
+                      </span>
                     </div>
 
                     {/* Status Badge */}
-                    <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-2xs ${statusCheck.badgeClass}`}>
+                    <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-2xs shrink-0 ${statusCheck.badgeClass}`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${statusCheck.dotClass} ${statusCheck.isOpen ? 'animate-pulse ring-2 ring-emerald-200' : ''}`} />
                       <span>{statusCheck.statusLabel}</span>
                     </span>

@@ -12,6 +12,7 @@ import {
   ShieldAlert
 } from 'lucide-react';
 import { Campaign } from '../../types';
+import { getCampaignTheme } from '../../utils/campaignHelper';
 
 interface ShareQrTabProps {
   campaign: Campaign;
@@ -25,6 +26,7 @@ export const ShareQrTab: React.FC<ShareQrTabProps> = ({
   onResetAllData,
 }) => {
   const [copied, setCopied] = useState(false);
+  const theme = getCampaignTheme(campaign);
   const currentUrl = window.location.href.split('?')[0];
 
   const handleCopy = () => {
@@ -71,35 +73,40 @@ export const ShareQrTab: React.FC<ShareQrTabProps> = ({
         
         {/* Left: Printable Standee / QR Poster preview */}
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col items-center text-center">
-          <div className="w-full max-w-sm p-6 rounded-2xl border-2 border-dashed border-teal-300 bg-gradient-to-b from-teal-50/50 to-white shadow-xs">
-            <div className="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center mx-auto mb-2 shadow-xs">
+          <div className="w-full max-w-sm p-6 rounded-2xl border-2 border-dashed bg-gradient-to-b from-white to-slate-50 shadow-xs" style={{ borderColor: theme.hex }}>
+            <div className="w-10 h-10 rounded-xl text-white flex items-center justify-center mx-auto mb-2 shadow-xs" style={{ backgroundColor: theme.hex }}>
               <Hospital className="w-6 h-6" />
             </div>
             <h3 className="text-base font-bold text-slate-900 font-['Prompt']">
               สแกนประเมินความพึงพอใจ
             </h3>
-            <p className="text-xs font-semibold text-teal-700 mt-0.5">
-              บริการตรวจสุขภาพ ({campaign.code})
-            </p>
-            <p className="text-[11px] text-slate-500 mb-4">
+            <div className="flex items-center justify-center gap-1.5 mt-1 mb-1">
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${theme.badgeBg}`}>
+                {campaign.code}
+              </span>
+              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${theme.chipClass}`}>
+                {theme.name.split(' ')[0]}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 mb-4 line-clamp-1">
               {campaign.title}
             </p>
 
-            {/* Crisp QR Code Graphic */}
+            {/* Crisp QR Code Graphic with Activity Theme Accent */}
             <div className="w-48 h-48 bg-white p-3 rounded-2xl border border-slate-200 mx-auto shadow-inner flex items-center justify-center">
               <svg className="w-full h-full text-slate-900" viewBox="0 0 100 100" fill="currentColor">
                 {/* QR Finder Corners */}
-                <rect x="10" y="10" width="24" height="24" rx="3" fill="#0d9488" />
+                <rect x="10" y="10" width="24" height="24" rx="3" fill={theme.hex} />
                 <rect x="14" y="14" width="16" height="16" rx="2" fill="white" />
-                <rect x="18" y="18" width="8" height="8" rx="1" fill="#0d9488" />
+                <rect x="18" y="18" width="8" height="8" rx="1" fill={theme.hex} />
 
-                <rect x="66" y="10" width="24" height="24" rx="3" fill="#0d9488" />
+                <rect x="66" y="10" width="24" height="24" rx="3" fill={theme.hex} />
                 <rect x="70" y="14" width="16" height="16" rx="2" fill="white" />
-                <rect x="74" y="18" width="8" height="8" rx="1" fill="#0d9488" />
+                <rect x="74" y="18" width="8" height="8" rx="1" fill={theme.hex} />
 
-                <rect x="10" y="66" width="24" height="24" rx="3" fill="#0d9488" />
+                <rect x="10" y="66" width="24" height="24" rx="3" fill={theme.hex} />
                 <rect x="14" y="70" width="16" height="16" rx="2" fill="white" />
-                <rect x="18" y="74" width="8" height="8" rx="1" fill="#0d9488" />
+                <rect x="18" y="74" width="8" height="8" rx="1" fill={theme.hex} />
 
                 {/* QR Data Grid simulated dots */}
                 <rect x="40" y="12" width="6" height="6" rx="1" />

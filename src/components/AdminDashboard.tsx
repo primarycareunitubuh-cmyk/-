@@ -11,6 +11,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { Campaign, SurveySubmission } from '../types';
+import { getCampaignTheme } from '../utils/campaignHelper';
 import { AnalyticsTab } from './admin/AnalyticsTab';
 import { CampaignBuilderTab } from './admin/CampaignBuilderTab';
 import { CriteriaSettingsTab } from './admin/CriteriaSettingsTab';
@@ -93,23 +94,39 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </p>
           </div>
 
-          {/* Quick Active Campaign Switcher Badge */}
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-amber-400/20 shadow-lg min-w-[260px]">
-            <span className="text-[11px] uppercase tracking-wider text-amber-200/90 font-semibold block mb-1">
-              กำลังดูข้อมูลกิจกรรม:
-            </span>
-            <select
-              value={currentCampaign.id}
-              onChange={(e) => onSelectCampaign(e.target.value)}
-              className="w-full bg-slate-900/90 text-white text-xs sm:text-sm font-semibold rounded-xl px-3 py-2 border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-400"
-            >
-              {campaigns.map((camp) => (
-                <option key={camp.id} value={camp.id}>
-                  {camp.title} ({camp.code})
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Quick Active Campaign Switcher Badge with Activity Distinct Palette */}
+          {(() => {
+            const currentTheme = getCampaignTheme(currentCampaign);
+            return (
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-amber-400/20 shadow-lg min-w-[280px]">
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full ring-2 ring-white/30" style={{ backgroundColor: currentTheme.hex }} />
+                    <span className="text-[11px] uppercase tracking-wider text-amber-200/90 font-bold">
+                      กิจกรรมที่เลือก:
+                    </span>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${currentTheme.badgeBg}`}>
+                    {currentTheme.name.split(' ')[0]}
+                  </span>
+                </div>
+                <select
+                  value={currentCampaign.id}
+                  onChange={(e) => onSelectCampaign(e.target.value)}
+                  className="w-full bg-slate-900/90 text-white text-xs sm:text-sm font-semibold rounded-xl px-3 py-2 border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                >
+                  {campaigns.map((camp) => {
+                    const t = getCampaignTheme(camp);
+                    return (
+                      <option key={camp.id} value={camp.id}>
+                        [{camp.code}] {camp.title} ({t.name.split(' ')[0]})
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            );
+          })()}
         </div>
       </div>
 

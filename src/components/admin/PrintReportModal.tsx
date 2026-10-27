@@ -3,6 +3,7 @@ import { Printer, X, Hospital, Award, CheckCircle2, Calendar, FileText } from 'l
 import { Campaign, SurveySubmission } from '../../types';
 import { calculateCampaignStats } from '../../utils/scoring';
 import { STATION_INFO } from '../../data/initialData';
+import { getCampaignTheme } from '../../utils/campaignHelper';
 
 interface PrintReportModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export const PrintReportModal: React.FC<PrintReportModalProps> = ({
   if (!isOpen) return null;
 
   const stats = calculateCampaignStats(campaign, allResponses);
+  const theme = getCampaignTheme(campaign);
 
   const handlePrint = () => {
     window.print();
@@ -69,9 +71,17 @@ export const PrintReportModal: React.FC<PrintReportModalProps> = ({
                 รายงานผลการประเมินความพึงพอใจการบริการตรวจสุขภาพ
               </h1>
             </div>
-            <h2 className="text-base font-semibold text-slate-700">
-              {campaign.title} ({campaign.code})
-            </h2>
+            <div className="flex items-center justify-center gap-2 mt-1 mb-1 flex-wrap">
+              <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded border ${theme.badgeBg}`}>
+                {campaign.code}
+              </span>
+              <span className={`text-[11px] font-semibold px-2 py-0.5 rounded border ${theme.chipClass}`}>
+                {theme.name.split(' ')[0]}
+              </span>
+              <h2 className="text-base font-semibold text-slate-800">
+                {campaign.title}
+              </h2>
+            </div>
             <p className="text-xs text-slate-500 mt-1">
               หน่วยงานรับผิดชอบ: {campaign.targetUnit} • วันที่พิมพ์รายงาน: {currentDateThai}
             </p>

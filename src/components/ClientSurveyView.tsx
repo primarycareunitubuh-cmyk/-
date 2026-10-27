@@ -32,7 +32,7 @@ import {
 import { Campaign, Question, RespondentDemographics, SurveySubmission } from '../types';
 import { STATION_INFO } from '../data/initialData';
 import { computeSubmissionScorePercent } from '../utils/scoring';
-import { checkCampaignStatus, formatThaiDate } from '../utils/campaignHelper';
+import { checkCampaignStatus, formatThaiDate, getCampaignTheme } from '../utils/campaignHelper';
 
 interface ClientSurveyViewProps {
   campaign: Campaign;
@@ -55,6 +55,7 @@ export const ClientSurveyView: React.FC<ClientSurveyViewProps> = ({
   onBackToSelect,
   isKioskMode = false,
 }) => {
+  const theme = getCampaignTheme(campaign);
   const [answers, setAnswers] = useState<Record<string, number | string>>({});
   const [demographics, setDemographics] = useState<RespondentDemographics>({
     gender: 'ไม่ระบุ',
@@ -287,29 +288,41 @@ export const ClientSurveyView: React.FC<ClientSurveyViewProps> = ({
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 sm:py-10">
       
-      {/* Campaign Banner Header */}
+      {/* Campaign Banner Header with Distinct Activity Color Scheme */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200/90 mb-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-teal-50 to-transparent rounded-bl-full -z-0 pointer-events-none" />
+        {/* Top Activity Signature Color Stripe */}
+        <div className={`h-1.5 w-full bg-gradient-to-r ${theme.progressGradient} absolute top-0 left-0`} />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50/50 rounded-bl-full -z-0 pointer-events-none" />
         
         <div className="relative z-10">
-          {/* Back to activity selection button */}
-          {onBackToSelect && (
-            <div className="mb-4">
+          {/* Back to activity selection button & Mode indicator */}
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            {onBackToSelect ? (
               <button
                 type="button"
                 onClick={onBackToSelect}
-                className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-900 bg-emerald-50/80 hover:bg-emerald-100/90 px-3.5 py-1.5 rounded-xl border border-emerald-300 transition shadow-2xs group"
+                className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 bg-slate-100/90 hover:bg-slate-200 px-3.5 py-1.5 rounded-xl border border-slate-200 transition shadow-2xs group"
+                title="กลับสู่หน้าแรกเพื่อเลือกกิจกรรมอื่น"
               >
-                <ArrowLeft className="w-3.5 h-3.5 text-emerald-700 group-hover:-translate-x-0.5 transition-transform" />
+                <ArrowLeft className="w-3.5 h-3.5 text-slate-600 group-hover:-translate-x-0.5 transition-transform" />
                 <span>← เปลี่ยนกิจกรรมตรวจสุขภาพ (กลับหน้าแรก)</span>
               </button>
+            ) : <div />}
+
+            {/* Patient Mode Badge: Eliminates confusion for both patient and staff */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300/80 shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ring-2 ring-emerald-200" />
+              <span>โหมดผู้รับบริการ (Patient Evaluation)</span>
             </div>
-          )}
+          </div>
 
           <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-800 border border-emerald-300 shadow-2xs">
-              <Activity className="w-3.5 h-3.5 text-emerald-600" />
-              {campaign.code}
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-2xs ${theme.badgeBg}`}>
+              <Activity className="w-3.5 h-3.5 shrink-0" />
+              <span>{campaign.code}</span>
+            </span>
+            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold border ${theme.chipClass}`}>
+              {theme.name.split(' ')[0]}
             </span>
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold text-emerald-900 bg-amber-50/80 border border-amber-300/70 shadow-2xs">
               <Sparkles className="w-3 h-3 text-amber-500" />
@@ -456,20 +469,20 @@ export const ClientSurveyView: React.FC<ClientSurveyViewProps> = ({
         <div className="flex-1">
           <div className="flex items-center justify-between text-xs font-medium text-slate-600 mb-1.5">
             <span>ความคืบหน้าการตอบ ({answeredScoredCount}/{scoredQuestions.length} ข้อ)</span>
-            <span className="font-bold text-teal-700">{progressPercent}%</span>
+            <span className="font-bold text-slate-800">{progressPercent}%</span>
           </div>
           <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-teal-500 to-emerald-500 transition-all duration-300 rounded-full"
+              className={`h-full bg-gradient-to-r ${theme.progressGradient} transition-all duration-300 rounded-full`}
               style={{ width: `${progressPercent}%` }}
             />
           </div>
         </div>
 
         {answeredScoredCount > 0 && (
-          <div className="hidden sm:flex items-center gap-2 bg-teal-50 border border-teal-200/80 px-3 py-1.5 rounded-xl">
-            <span className="text-xs text-teal-800 font-medium">คะแนนร้อยละเฉลี่ย:</span>
-            <span className="text-sm font-bold text-teal-900">{currentEstimatedScore.toFixed(0)}%</span>
+          <div className="hidden sm:flex items-center gap-2 bg-slate-100/80 border border-slate-200 px-3 py-1.5 rounded-xl">
+            <span className="text-xs text-slate-700 font-medium">คะแนนร้อยละเฉลี่ย:</span>
+            <span className="text-sm font-bold text-slate-900">{currentEstimatedScore.toFixed(0)}%</span>
           </div>
         )}
       </div>
@@ -482,8 +495,8 @@ export const ClientSurveyView: React.FC<ClientSurveyViewProps> = ({
           const isCustom = question.category === 'dimension_other' || Boolean(question.customCategoryName) || !STATION_INFO[question.category];
           const displayDimName = question.customCategoryName || STATION_INFO[question.category]?.nameTh || question.category;
           const badgeClass = isCustom 
-            ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' 
-            : (STATION_INFO[question.category]?.badgeClass || 'bg-slate-100 text-slate-700');
+            ? 'bg-fuchsia-50 text-fuchsia-800 border border-fuchsia-300 font-medium' 
+            : (STATION_INFO[question.category]?.badgeClass || 'bg-slate-100 text-slate-700 font-medium');
 
           return (
             <div
@@ -720,7 +733,7 @@ export const ClientSurveyView: React.FC<ClientSurveyViewProps> = ({
           </div>
           <button
             type="submit"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-base font-bold text-white bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 shadow-lg shadow-teal-600/30 transition transform active:scale-98"
+            className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-base font-bold text-white ${theme.btnBg} transition transform active:scale-98`}
           >
             <Send className="w-5 h-5" />
             <span>ส่งแบบประเมินความพึงพอใจ</span>

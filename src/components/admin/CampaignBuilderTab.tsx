@@ -19,12 +19,11 @@ import {
   FileQuestion,
   X,
   Power,
-  Clock,
   ShieldCheck
 } from 'lucide-react';
 import { Campaign, Question, QuestionType, ServiceStation } from '../../types';
 import { STATION_INFO, DEFAULT_CRITERIA, SERVICE_DIMENSIONS_LIST } from '../../data/initialData';
-import { formatThaiDate } from '../../utils/campaignHelper';
+import { formatThaiDate, getCampaignTheme } from '../../utils/campaignHelper';
 
 interface CampaignBuilderTabProps {
   campaigns: Campaign[];
@@ -553,9 +552,20 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
                 <div>
                   {/* Top Badges Row */}
                   <div className="flex items-center justify-between gap-2 mb-2.5">
-                    <span className="text-[11px] font-bold font-mono px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
-                      {camp.code}
-                    </span>
+                    {(() => {
+                      const campTheme = getCampaignTheme(camp);
+                      return (
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="w-2.5 h-2.5 rounded-full shrink-0 ring-1 ring-slate-300" style={{ backgroundColor: campTheme.hex }} />
+                          <span className={`text-[11px] font-bold font-mono px-2.5 py-0.5 rounded-md border ${campTheme.badgeBg}`}>
+                            {camp.code}
+                          </span>
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${campTheme.chipClass}`}>
+                            {campTheme.name.split(' ')[0]}
+                          </span>
+                        </div>
+                      );
+                    })()}
 
                     <div className="flex items-center gap-1.5">
                       {/* Status Badge */}
@@ -740,8 +750,8 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
             const isCustom = question.category === 'dimension_other' || Boolean(question.customCategoryName) || !STATION_INFO[question.category];
             const displayCategoryName = question.customCategoryName || STATION_INFO[question.category]?.nameTh || question.category;
             const categoryBadgeClass = isCustom 
-              ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' 
-              : (STATION_INFO[question.category]?.badgeClass || 'bg-slate-100 text-slate-700');
+              ? 'bg-fuchsia-50 text-fuchsia-800 border border-fuchsia-300 font-medium' 
+              : (STATION_INFO[question.category]?.badgeClass || 'bg-slate-100 text-slate-700 font-medium');
 
             return (
               <div

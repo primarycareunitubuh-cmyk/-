@@ -11,6 +11,7 @@ import {
   LayoutGrid
 } from 'lucide-react';
 import { Campaign } from '../types';
+import { getCampaignTheme } from '../utils/campaignHelper';
 
 export type AppView = 'landing' | 'survey' | 'admin' | 'kiosk';
 
@@ -82,7 +83,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Center Mode Indicator (Reducing confusion for patients) */}
+          {/* Center Mode Indicator (Eliminates confusion between patient and staff views) */}
           <div className="flex items-center gap-2">
             {isPatientMode ? (
               <div className="flex items-center gap-2">
@@ -93,22 +94,33 @@ export const Header: React.FC<HeaderProps> = ({
                   <span>โหมดผู้รับบริการ</span>
                 </div>
 
-                {/* If in survey view, provide a quick switch button back to activity list */}
-                {currentView === 'survey' && (
-                  <button
-                    onClick={onBackToLanding}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 border border-slate-200/80 hover:border-emerald-200 transition shadow-2xs"
-                    title="กลับไปเลือกกิจกรรมตรวจสุขภาพอื่น"
-                  >
-                    <LayoutGrid className="w-3.5 h-3.5 text-slate-500" />
-                    <span className="hidden sm:inline">เปลี่ยนกิจกรรม</span>
-                  </button>
+                {/* If in survey view, show current activity badge + switch button */}
+                {currentView === 'survey' && activeCampaign && (
+                  <>
+                    {(() => {
+                      const activeTheme = getCampaignTheme(activeCampaign);
+                      return (
+                        <div className={`hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${activeTheme.chipClass}`}>
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: activeTheme.hex }} />
+                          <span className="max-w-[140px] truncate">{activeCampaign.code}</span>
+                        </div>
+                      );
+                    })()}
+                    <button
+                      onClick={onBackToLanding}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 border border-slate-200/80 hover:border-emerald-200 transition shadow-2xs"
+                      title="กลับไปเลือกกิจกรรมตรวจสุขภาพอื่น"
+                    >
+                      <LayoutGrid className="w-3.5 h-3.5 text-slate-500" />
+                      <span className="hidden sm:inline">เปลี่ยนกิจกรรม</span>
+                    </button>
+                  </>
                 )}
               </div>
             ) : (
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-slate-900 to-emerald-950 text-white border border-amber-400/30 text-xs sm:text-sm font-semibold shadow-sm">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-slate-950 via-slate-900 to-emerald-950 text-white border border-amber-400/40 text-xs sm:text-sm font-bold shadow-md shadow-slate-950/20">
                 <ShieldCheck className="w-4 h-4 text-amber-400" />
-                <span>ระบบจัดการเจ้าหน้าที่</span>
+                <span>โหมดเจ้าหน้าที่และผู้ดูแลระบบ</span>
               </div>
             )}
 

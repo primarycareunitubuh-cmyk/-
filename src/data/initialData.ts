@@ -1,70 +1,96 @@
 import { Campaign, ScoringCriterion, ServiceStation, SurveySubmission } from '../types';
 
-export const DIMENSION_INFO: Record<string, { nameTh: string; shortName: string; color: string; badgeClass: string; icon: string }> = {
+export interface DimensionMeta {
+  nameTh: string;
+  shortName: string;
+  color: string;
+  hex: string;
+  badgeClass: string;
+  barGradient: string;
+  icon: string;
+}
+
+export const DIMENSION_INFO: Record<string, DimensionMeta> = {
   dimension_staff: { 
     nameTh: 'ด้านที่ 1: การให้บริการของเจ้าหน้าที่ (หน้างาน)', 
     shortName: 'การให้บริการของเจ้าหน้าที่',
-    color: 'blue', 
-    badgeClass: 'bg-blue-50 text-blue-700 border border-blue-200',
+    color: 'sky', 
+    hex: '#0284c7',
+    badgeClass: 'bg-sky-50 text-sky-800 border border-sky-300 font-medium',
+    barGradient: 'from-sky-500 to-blue-600',
     icon: 'UserCheck' 
   },
   dimension_process_time: { 
     nameTh: 'ด้านที่ 2: ระบบขั้นตอนและระยะเวลาการให้บริการ', 
     shortName: 'ขั้นตอนและระยะเวลา',
     color: 'teal', 
-    badgeClass: 'bg-teal-50 text-teal-700 border border-teal-200',
+    hex: '#0d9488',
+    badgeClass: 'bg-teal-50 text-teal-800 border border-teal-300 font-medium',
+    barGradient: 'from-teal-500 to-emerald-600',
     icon: 'Clock' 
   },
   dimension_facility: { 
     nameTh: 'ด้านที่ 3: สถานที่และสิ่งอำนวยความสะดวก', 
     shortName: 'สถานที่และสิ่งอำนวยความสะดวก',
     color: 'amber', 
-    badgeClass: 'bg-amber-50 text-amber-700 border border-amber-200',
+    hex: '#d97706',
+    badgeClass: 'bg-amber-50 text-amber-900 border border-amber-300 font-medium',
+    barGradient: 'from-amber-400 to-orange-500',
     icon: 'Building' 
   },
   dimension_result_followup: { 
     nameTh: 'ด้านที่ 4: ระบบแจ้งผลและการติดตามดูแลต่อเนื่อง', 
     shortName: 'ระบบแจ้งผลและติดตามดูแล',
     color: 'indigo', 
-    badgeClass: 'bg-indigo-50 text-indigo-700 border border-indigo-200',
+    hex: '#4f46e5',
+    badgeClass: 'bg-indigo-50 text-indigo-800 border border-indigo-300 font-medium',
+    barGradient: 'from-indigo-500 to-blue-700',
     icon: 'FileText' 
   },
   dimension_overall: { 
     nameTh: 'ด้านที่ 5: ความพึงพอใจโดยรวม', 
     shortName: 'ความพึงพอใจโดยรวม',
     color: 'purple', 
-    badgeClass: 'bg-purple-50 text-purple-700 border border-purple-200',
+    hex: '#7c3aed',
+    badgeClass: 'bg-purple-50 text-purple-800 border border-purple-300 font-medium',
+    barGradient: 'from-purple-500 to-violet-600',
     icon: 'Sparkles' 
   },
   dimension_loyalty_recommend: {
     nameTh: 'ด้านความตั้งใจใช้บริการและบอกต่อ',
     shortName: 'ความตั้งใจใช้บริการและบอกต่อ',
     color: 'emerald',
-    badgeClass: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+    hex: '#059669',
+    badgeClass: 'bg-emerald-50 text-emerald-800 border border-emerald-300 font-medium',
+    barGradient: 'from-emerald-500 to-teal-600',
     icon: 'ThumbsUp',
   },
   dimension_feedback_suggestion: {
     nameTh: 'ด้านข้อคิดเห็นและข้อเสนอแนะ',
     shortName: 'ข้อคิดเห็นและข้อเสนอแนะ',
     color: 'rose',
-    badgeClass: 'bg-rose-50 text-rose-700 border border-rose-200',
+    hex: '#e11d48',
+    badgeClass: 'bg-rose-50 text-rose-800 border border-rose-300 font-medium',
+    barGradient: 'from-rose-500 to-pink-600',
     icon: 'MessageSquare',
   },
   dimension_other: {
     nameTh: 'อื่นๆ (ระบุด้านด้วยตนเอง)',
     shortName: 'ระบุด้านด้วยตนเอง',
-    color: 'indigo',
-    badgeClass: 'bg-indigo-50 text-indigo-700 border border-indigo-200',
+    color: 'fuchsia',
+    hex: '#c026d3',
+    badgeClass: 'bg-fuchsia-50 text-fuchsia-800 border border-fuchsia-300 font-medium',
+    barGradient: 'from-fuchsia-500 to-pink-600',
     icon: 'Layers',
   },
   // Mapping for backwards compatibility
-  registration: { nameTh: 'ด้านที่ 2: ระบบขั้นตอนและระยะเวลาการให้บริการ', shortName: 'ขั้นตอนและระยะเวลา', color: 'teal', badgeClass: 'bg-teal-50 text-teal-700 border border-teal-200', icon: 'Clock' },
-  lab_blood: { nameTh: 'ด้านที่ 1: การให้บริการของเจ้าหน้าที่ (หน้างาน)', shortName: 'การให้บริการของเจ้าหน้าที่', color: 'blue', badgeClass: 'bg-blue-50 text-blue-700 border border-blue-200', icon: 'UserCheck' },
-  xray: { nameTh: 'ด้านที่ 2: ระบบขั้นตอนและระยะเวลาการให้บริการ', shortName: 'ขั้นตอนและระยะเวลา', color: 'teal', badgeClass: 'bg-teal-50 text-teal-700 border border-teal-200', icon: 'Clock' },
-  doctor: { nameTh: 'ด้านที่ 1: การให้บริการของเจ้าหน้าที่ (หน้างาน)', shortName: 'การให้บริการของเจ้าหน้าที่', color: 'blue', badgeClass: 'bg-blue-50 text-blue-700 border border-blue-200', icon: 'UserCheck' },
-  place_facility: { nameTh: 'ด้านที่ 3: สถานที่และสิ่งอำนวยความสะดวก', shortName: 'สถานที่และสิ่งอำนวยความสะดวก', color: 'amber', badgeClass: 'bg-amber-50 text-amber-700 border border-amber-200', icon: 'Building' },
-  speed: { nameTh: 'ด้านที่ 2: ระบบขั้นตอนและระยะเวลาการให้บริการ', shortName: 'ขั้นตอนและระยะเวลา', color: 'teal', badgeClass: 'bg-teal-50 text-teal-700 border border-teal-200', icon: 'Clock' },
-  general: { nameTh: 'ด้านที่ 5: ความพึงพอใจโดยรวม', shortName: 'ความพึงพอใจโดยรวม', color: 'purple', badgeClass: 'bg-purple-50 text-purple-700 border border-purple-200', icon: 'Sparkles' },
+  registration: { nameTh: 'ด้านที่ 2: ระบบขั้นตอนและระยะเวลาการให้บริการ', shortName: 'ขั้นตอนและระยะเวลา', color: 'teal', hex: '#0d9488', badgeClass: 'bg-teal-50 text-teal-800 border border-teal-300 font-medium', barGradient: 'from-teal-500 to-emerald-600', icon: 'Clock' },
+  lab_blood: { nameTh: 'ด้านที่ 1: การให้บริการของเจ้าหน้าที่ (หน้างาน)', shortName: 'การให้บริการของเจ้าหน้าที่', color: 'sky', hex: '#0284c7', badgeClass: 'bg-sky-50 text-sky-800 border border-sky-300 font-medium', barGradient: 'from-sky-500 to-blue-600', icon: 'UserCheck' },
+  xray: { nameTh: 'ด้านที่ 2: ระบบขั้นตอนและระยะเวลาการให้บริการ', shortName: 'ขั้นตอนและระยะเวลา', color: 'teal', hex: '#0d9488', badgeClass: 'bg-teal-50 text-teal-800 border border-teal-300 font-medium', barGradient: 'from-teal-500 to-emerald-600', icon: 'Clock' },
+  doctor: { nameTh: 'ด้านที่ 1: การให้บริการของเจ้าหน้าที่ (หน้างาน)', shortName: 'การให้บริการของเจ้าหน้าที่', color: 'sky', hex: '#0284c7', badgeClass: 'bg-sky-50 text-sky-800 border border-sky-300 font-medium', barGradient: 'from-sky-500 to-blue-600', icon: 'UserCheck' },
+  place_facility: { nameTh: 'ด้านที่ 3: สถานที่และสิ่งอำนวยความสะดวก', shortName: 'สถานที่และสิ่งอำนวยความสะดวก', color: 'amber', hex: '#d97706', badgeClass: 'bg-amber-50 text-amber-900 border border-amber-300 font-medium', barGradient: 'from-amber-400 to-orange-500', icon: 'Building' },
+  speed: { nameTh: 'ด้านที่ 2: ระบบขั้นตอนและระยะเวลาการให้บริการ', shortName: 'ขั้นตอนและระยะเวลา', color: 'teal', hex: '#0d9488', badgeClass: 'bg-teal-50 text-teal-800 border border-teal-300 font-medium', barGradient: 'from-teal-500 to-emerald-600', icon: 'Clock' },
+  general: { nameTh: 'ด้านที่ 5: ความพึงพอใจโดยรวม', shortName: 'ความพึงพอใจโดยรวม', color: 'purple', hex: '#7c3aed', badgeClass: 'bg-purple-50 text-purple-800 border border-purple-300 font-medium', barGradient: 'from-purple-500 to-violet-600', icon: 'Sparkles' },
 };
 
 export const STATION_INFO = DIMENSION_INFO;

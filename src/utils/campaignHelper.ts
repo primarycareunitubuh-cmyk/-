@@ -8,6 +8,160 @@ export interface CampaignStatusCheck {
   reason?: string;
 }
 
+export interface CampaignTheme {
+  id: string;
+  name: string;
+  primaryColor: string; // e.g. 'emerald', 'blue', 'amber', 'purple', 'rose', 'teal'
+  hex: string;
+  badgeBg: string;
+  iconBg: string;
+  iconText: string;
+  borderHover: string;
+  cardBgGradient: string;
+  btnBg: string;
+  progressGradient: string;
+  bannerGradient: string;
+  tagClass: string;
+  chipClass: string;
+}
+
+export const CAMPAIGN_THEMES: CampaignTheme[] = [
+  {
+    id: 'emerald',
+    name: 'มรกต-ทอง (ตรวจสุขภาพประจำปี)',
+    primaryColor: 'emerald',
+    hex: '#059669',
+    badgeBg: 'bg-emerald-50 text-emerald-800 border-emerald-300',
+    iconBg: 'bg-gradient-to-br from-emerald-100 to-teal-100 border-emerald-300 text-emerald-800',
+    iconText: 'text-emerald-700',
+    borderHover: 'hover:border-emerald-400 group-hover:text-emerald-900',
+    cardBgGradient: 'from-white via-white to-emerald-50/40',
+    btnBg: 'bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 hover:from-emerald-800 hover:to-teal-800 focus:ring-emerald-500 shadow-emerald-700/25',
+    progressGradient: 'from-emerald-600 to-teal-600',
+    bannerGradient: 'from-emerald-900 via-teal-900 to-emerald-950',
+    tagClass: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+    chipClass: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+  },
+  {
+    id: 'blue',
+    name: 'น้ำเงินคราม-ฟ้าสว่าง (หน่วยเคลื่อนที่)',
+    primaryColor: 'blue',
+    hex: '#2563eb',
+    badgeBg: 'bg-blue-50 text-blue-800 border-blue-300',
+    iconBg: 'bg-gradient-to-br from-blue-100 to-cyan-100 border-blue-300 text-blue-800',
+    iconText: 'text-blue-700',
+    borderHover: 'hover:border-blue-400 group-hover:text-blue-900',
+    cardBgGradient: 'from-white via-white to-blue-50/40',
+    btnBg: 'bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 hover:from-blue-800 hover:to-indigo-800 focus:ring-blue-500 shadow-blue-700/25',
+    progressGradient: 'from-blue-600 to-cyan-600',
+    bannerGradient: 'from-blue-950 via-slate-900 to-indigo-950',
+    tagClass: 'bg-blue-100 text-blue-900 border-blue-300',
+    chipClass: 'bg-blue-50 text-blue-800 border-blue-200',
+  },
+  {
+    id: 'amber',
+    name: 'ทองอำพัน-บรอนซ์ (ก่อนเข้าทำงาน/ใบรับรองแพทย์)',
+    primaryColor: 'amber',
+    hex: '#d97706',
+    badgeBg: 'bg-amber-50 text-amber-900 border-amber-300',
+    iconBg: 'bg-gradient-to-br from-amber-100 to-orange-100 border-amber-300 text-amber-800',
+    iconText: 'text-amber-700',
+    borderHover: 'hover:border-amber-400 group-hover:text-amber-900',
+    cardBgGradient: 'from-white via-white to-amber-50/40',
+    btnBg: 'bg-gradient-to-r from-amber-700 via-orange-700 to-amber-800 hover:from-amber-800 hover:to-orange-800 focus:ring-amber-500 shadow-amber-700/25',
+    progressGradient: 'from-amber-500 to-orange-500',
+    bannerGradient: 'from-slate-950 via-amber-950 to-stone-900',
+    tagClass: 'bg-amber-100 text-amber-900 border-amber-300',
+    chipClass: 'bg-amber-50 text-amber-900 border-amber-200',
+  },
+  {
+    id: 'purple',
+    name: 'อเมทิสต์-ม่วงสง่างาม (คัดกรองพิเศษ/เฉพาะทาง)',
+    primaryColor: 'purple',
+    hex: '#7c3aed',
+    badgeBg: 'bg-purple-50 text-purple-800 border-purple-300',
+    iconBg: 'bg-gradient-to-br from-purple-100 to-violet-100 border-purple-300 text-purple-800',
+    iconText: 'text-purple-700',
+    borderHover: 'hover:border-purple-400 group-hover:text-purple-900',
+    cardBgGradient: 'from-white via-white to-purple-50/40',
+    btnBg: 'bg-gradient-to-r from-purple-700 via-violet-700 to-purple-800 hover:from-purple-800 hover:to-violet-800 focus:ring-purple-500 shadow-purple-700/25',
+    progressGradient: 'from-purple-600 to-violet-600',
+    bannerGradient: 'from-slate-950 via-purple-950 to-violet-950',
+    tagClass: 'bg-purple-100 text-purple-900 border-purple-300',
+    chipClass: 'bg-purple-50 text-purple-800 border-purple-200',
+  },
+  {
+    id: 'rose',
+    name: 'ทับทิม-คอรัล (สุขภาพชุมชน/กลุ่มเสี่ยง)',
+    primaryColor: 'rose',
+    hex: '#e11d48',
+    badgeBg: 'bg-rose-50 text-rose-800 border-rose-300',
+    iconBg: 'bg-gradient-to-br from-rose-100 to-pink-100 border-rose-300 text-rose-800',
+    iconText: 'text-rose-700',
+    borderHover: 'hover:border-rose-400 group-hover:text-rose-900',
+    cardBgGradient: 'from-white via-white to-rose-50/40',
+    btnBg: 'bg-gradient-to-r from-rose-700 via-pink-700 to-rose-800 hover:from-rose-800 hover:to-pink-800 focus:ring-rose-500 shadow-rose-700/25',
+    progressGradient: 'from-rose-500 to-pink-500',
+    bannerGradient: 'from-slate-950 via-rose-950 to-stone-900',
+    tagClass: 'bg-rose-100 text-rose-900 border-rose-300',
+    chipClass: 'bg-rose-50 text-rose-800 border-rose-200',
+  },
+  {
+    id: 'teal',
+    name: 'เขียวหัวเป็ด-เทอร์ควอยซ์ (บริการทั่วไป)',
+    primaryColor: 'teal',
+    hex: '#0d9488',
+    badgeBg: 'bg-teal-50 text-teal-800 border-teal-300',
+    iconBg: 'bg-gradient-to-br from-teal-100 to-cyan-100 border-teal-300 text-teal-800',
+    iconText: 'text-teal-700',
+    borderHover: 'hover:border-teal-400 group-hover:text-teal-900',
+    cardBgGradient: 'from-white via-white to-teal-50/40',
+    btnBg: 'bg-gradient-to-r from-teal-700 via-emerald-700 to-teal-800 hover:from-teal-800 hover:to-emerald-800 focus:ring-teal-500 shadow-teal-700/25',
+    progressGradient: 'from-teal-600 to-emerald-600',
+    bannerGradient: 'from-slate-950 via-teal-950 to-slate-900',
+    tagClass: 'bg-teal-100 text-teal-900 border-teal-300',
+    chipClass: 'bg-teal-50 text-teal-800 border-teal-200',
+  },
+];
+
+/**
+ * Returns a distinct, deterministic color theme for any campaign/activity
+ * so patients and staff can immediately distinguish each activity.
+ */
+export function getCampaignTheme(campaign?: Campaign | null, fallbackIndex: number = 0): CampaignTheme {
+  if (!campaign) return CAMPAIGN_THEMES[0];
+
+  const code = (campaign.code || '').toUpperCase();
+  const title = campaign.title || '';
+
+  // 1. Check by typical keywords
+  if (code.includes('ANNUAL') || title.includes('ประจำปี')) {
+    return CAMPAIGN_THEMES[0]; // Emerald
+  }
+  if (code.includes('MOBILE') || title.includes('เคลื่อนที่') || title.includes('เชิงรุก')) {
+    return CAMPAIGN_THEMES[1]; // Royal Blue
+  }
+  if (code.includes('PRE') || title.includes('เข้าทำงาน') || title.includes('ใบรับรองแพทย์')) {
+    return CAMPAIGN_THEMES[2]; // Amber
+  }
+  if (title.includes('ผู้บริหาร') || title.includes('พิเศษ') || title.includes('คัดกรองความเสี่ยง')) {
+    return CAMPAIGN_THEMES[3]; // Purple
+  }
+  if (title.includes('ชุมชน') || title.includes('สิทธิบัตรทอง') || title.includes('ประกันสังคม')) {
+    return CAMPAIGN_THEMES[4]; // Rose
+  }
+
+  // 2. Hash ID/Code to distribute custom campaigns across distinct themes
+  const hashStr = campaign.id + campaign.code + campaign.title;
+  let hash = 0;
+  for (let i = 0; i < hashStr.length; i++) {
+    hash = (hash << 5) - hash + hashStr.charCodeAt(i);
+    hash |= 0;
+  }
+  const themeIndex = Math.abs(hash + fallbackIndex) % CAMPAIGN_THEMES.length;
+  return CAMPAIGN_THEMES[themeIndex];
+}
+
 /**
  * Formats a YYYY-MM-DD date string to Thai readable format (e.g. 25 ต.ค. 2569)
  */

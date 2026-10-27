@@ -50,6 +50,13 @@ export const DIMENSION_INFO: Record<string, { nameTh: string; shortName: string;
     badgeClass: 'bg-rose-50 text-rose-700 border border-rose-200',
     icon: 'MessageSquare',
   },
+  dimension_other: {
+    nameTh: 'อื่นๆ (ระบุด้านด้วยตนเอง)',
+    shortName: 'ระบุด้านด้วยตนเอง',
+    color: 'indigo',
+    badgeClass: 'bg-indigo-50 text-indigo-700 border border-indigo-200',
+    icon: 'Layers',
+  },
   // Mapping for backwards compatibility
   registration: { nameTh: 'ด้านที่ 2: ระบบขั้นตอนและระยะเวลาการให้บริการ', shortName: 'ขั้นตอนและระยะเวลา', color: 'teal', badgeClass: 'bg-teal-50 text-teal-700 border border-teal-200', icon: 'Clock' },
   lab_blood: { nameTh: 'ด้านที่ 1: การให้บริการของเจ้าหน้าที่ (หน้างาน)', shortName: 'การให้บริการของเจ้าหน้าที่', color: 'blue', badgeClass: 'bg-blue-50 text-blue-700 border border-blue-200', icon: 'UserCheck' },
@@ -70,6 +77,7 @@ export const SERVICE_DIMENSIONS_LIST = [
   { key: 'dimension_overall', nameTh: 'ด้านที่ 5: ความพึงพอใจโดยรวม', shortName: 'ความพึงพอใจโดยรวม' },
   { key: 'dimension_loyalty_recommend', nameTh: 'ด้านความตั้งใจใช้บริการและบอกต่อ', shortName: 'ความตั้งใจใช้บริการและบอกต่อ' },
   { key: 'dimension_feedback_suggestion', nameTh: 'ด้านข้อคิดเห็นและข้อเสนอแนะ', shortName: 'ข้อคิดเห็นและข้อเสนอแนะ' },
+  { key: 'dimension_other', nameTh: 'อื่นๆ (ระบุด้านด้วยตนเอง)', shortName: 'ระบุด้านด้วยตนเอง' },
 ];
 
 export const DEFAULT_CRITERIA: ScoringCriterion[] = [

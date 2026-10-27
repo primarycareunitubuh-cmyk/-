@@ -14,7 +14,9 @@ export type ServiceDimension =
   | 'dimension_result_followup'    // ด้านที่ 4: ระบบแจ้งผลและการติดตามดูแลต่อเนื่อง
   | 'dimension_overall'            // ด้านที่ 5: ความพึงพอใจโดยรวม
   | 'dimension_loyalty_recommend'  // ด้านความตั้งใจใช้บริการและบอกต่อ
-  | 'dimension_feedback_suggestion'; // ด้านข้อคิดเห็นและข้อเสนอแนะ
+  | 'dimension_feedback_suggestion' // ด้านข้อคิดเห็นและข้อเสนอแนะ
+  | 'dimension_other'              // ด้านอื่นๆ (ระบุด้านด้วยตนเอง)
+  | string;
 
 export type ServiceStation = ServiceDimension;
 
@@ -22,6 +24,7 @@ export interface Question {
   id: string;
   text: string;
   category: ServiceStation;
+  customCategoryName?: string; // ชื่อด้านการประเมินที่กำหนดเองเมื่อเลือก dimension_other
   type: QuestionType;
   required: boolean;
   order: number;

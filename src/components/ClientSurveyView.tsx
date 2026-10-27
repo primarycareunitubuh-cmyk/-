@@ -479,7 +479,11 @@ export const ClientSurveyView: React.FC<ClientSurveyViewProps> = ({
         
         {campaign.questions.map((question, index) => {
           const isAnswered = answers[question.id] !== undefined;
-          const stInfo = STATION_INFO[question.category] || { nameTh: 'จุดบริการ', color: 'teal' };
+          const isCustom = question.category === 'dimension_other' || Boolean(question.customCategoryName) || !STATION_INFO[question.category];
+          const displayDimName = question.customCategoryName || STATION_INFO[question.category]?.nameTh || question.category;
+          const badgeClass = isCustom 
+            ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' 
+            : (STATION_INFO[question.category]?.badgeClass || 'bg-slate-100 text-slate-700');
 
           return (
             <div
@@ -494,12 +498,12 @@ export const ClientSurveyView: React.FC<ClientSurveyViewProps> = ({
               {/* Question Header */}
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1.5">
+                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                     <span className="w-6 h-6 rounded-full bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center shrink-0">
                       {index + 1}
                     </span>
-                    <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-md ${stInfo.badgeClass || 'bg-slate-100 text-slate-700'}`}>
-                      {stInfo.nameTh}
+                    <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-md ${badgeClass}`}>
+                      {displayDimName}
                     </span>
                     {question.required && (
                       <span className="text-rose-500 text-xs font-medium" title="จำเป็นต้องตอบ">

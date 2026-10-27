@@ -154,10 +154,24 @@ export const calculateCampaignStats = (
   const ratingCriterion = getCriterionForPercent(overallScorePercent, campaign.criteria);
   const isGoalMet = overallScorePercent >= campaign.targetGoalPercent;
 
-  // Station breakdown
-  const stationsPresent = Array.from(new Set(scoreQuestions.map(q => q.category)));
-  const stationStats = stationsPresent.map(station => {
-    const stQuestions = scoreQuestions.filter(q => q.category === station);
+  // Station breakdown (support custom dimension names)
+  const getStationKey = (q: Question) => {
+    if ((q.category === 'dimension_other' || !STATION_INFO[q.category]) && q.customCategoryName) {
+      return `custom_${q.customCategoryName}`;
+    }
+    return q.category;
+  };
+
+  const getStationDisplayName = (q: Question) => {
+    if (q.customCategoryName) {
+      return q.customCategoryName;
+    }
+    return STATION_INFO[q.category]?.nameTh || q.category;
+  };
+
+  const stationKeys = Array.from(new Set(scoreQuestions.map(getStationKey)));
+  const stationStats = stationKeys.map(key => {
+    const stQuestions = scoreQuestions.filter(q => getStationKey(q) === key);
     let stSum = 0;
     let stCount = 0;
 
@@ -173,14 +187,16 @@ export const calculateCampaignStats = (
 
     const avg = stCount > 0 ? Number((stSum / stCount).toFixed(2)) : 0;
     const percent = stCount > 0 ? Number(((avg / scaleMax) * 100).toFixed(2)) : 0;
-    const info = STATION_INFO[station] || { nameTh: station, color: 'slate' };
+    const sampleQ = stQuestions[0];
+    const stationName = getStationDisplayName(sampleQ);
+    const info = STATION_INFO[sampleQ.category] || { nameTh: stationName, color: 'indigo' };
 
     return {
-      station,
-      stationName: info.nameTh,
+      station: (key.startsWith('custom_') ? 'dimension_other' : key) as ServiceStation,
+      stationName,
       avgScore: avg,
       percentageScore: percent,
-      color: info.color,
+      color: info.color || 'indigo',
       questionCount: stQuestions.length,
     };
   }).sort((a, b) => b.percentageScore - a.percentageScore);

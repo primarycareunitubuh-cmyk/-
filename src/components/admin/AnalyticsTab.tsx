@@ -40,7 +40,13 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
 
   const filteredQuestionStats = selectedStationFilter === 'all'
     ? stats.questionStats
-    : stats.questionStats.filter(q => q.question.category === selectedStationFilter);
+    : stats.questionStats.filter(q => {
+        if (selectedStationFilter.startsWith('custom:')) {
+          const targetName = selectedStationFilter.replace('custom:', '');
+          return q.question.customCategoryName === targetName;
+        }
+        return q.question.category === selectedStationFilter;
+      });
 
   // Demographics breakdown calculation
   let relevantResponses = allResponses.filter(r => r.campaignId === campaign.id);
@@ -110,11 +116,18 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
             className="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-slate-700 focus:outline-none focus:ring-1 focus:ring-teal-500 font-medium"
           >
             <option value="all">ทุกด้านการประเมิน (ครบทุกมิติ)</option>
-            {SERVICE_DIMENSIONS_LIST.map((dim) => (
+            {SERVICE_DIMENSIONS_LIST.filter(d => d.key !== 'dimension_other').map((dim) => (
               <option key={dim.key} value={dim.key}>
                 {dim.nameTh}
               </option>
             ))}
+            {/* Any custom dimensions present in this campaign */}
+            {Array.from(new Set(campaign.questions.filter(q => q.customCategoryName).map(q => q.customCategoryName!))).map(cName => (
+              <option key={cName} value={`custom:${cName}`}>
+                ด้านกำหนดเอง: {cName}
+              </option>
+            ))}
+            <option value="dimension_other">ด้านอื่นๆ ทั้งหมด</option>
           </select>
         </div>
 
@@ -487,7 +500,11 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
             <tbody className="divide-y divide-slate-100">
               {filteredQuestionStats.map((item, idx) => {
                 const isScored = item.question.type !== 'text';
-                const stInfo = STATION_INFO[item.question.category] || { nameTh: item.question.category };
+                const isCustom = item.question.category === 'dimension_other' || Boolean(item.question.customCategoryName) || !STATION_INFO[item.question.category];
+                const dimName = item.question.customCategoryName || STATION_INFO[item.question.category]?.nameTh || item.question.category;
+                const badgeClass = isCustom 
+                  ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' 
+                  : (STATION_INFO[item.question.category]?.badgeClass || 'bg-slate-100 text-slate-700');
                 const isAbove = item.percentageScore >= campaign.targetGoalPercent;
 
                 return (
@@ -506,8 +523,8 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
                       )}
                     </td>
                     <td className="py-3.5 px-3 whitespace-nowrap">
-                      <span className={`px-2.5 py-0.5 rounded-md text-xs font-semibold ${stInfo.badgeClass || 'bg-slate-100 text-slate-700'}`}>
-                        {stInfo.nameTh}
+                      <span className={`px-2.5 py-0.5 rounded-md text-xs font-semibold ${badgeClass}`}>
+                        {dimName}
                       </span>
                     </td>
                     <td className="py-3.5 px-3 text-center text-slate-600">

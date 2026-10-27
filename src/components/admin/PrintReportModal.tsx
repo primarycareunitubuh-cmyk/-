@@ -156,7 +156,7 @@ export const PrintReportModal: React.FC<PrintReportModalProps> = ({
                     <td className="py-2 px-2 text-center font-bold text-slate-500">{idx + 1}</td>
                     <td className="py-2 px-3 font-medium">{q.question.text}</td>
                     <td className="py-2 px-3 text-slate-600">
-                      {STATION_INFO[q.question.category]?.nameTh || q.question.category}
+                      {q.question.customCategoryName || STATION_INFO[q.question.category]?.nameTh || q.question.category}
                     </td>
                     <td className="py-2 px-2 text-center">{q.responseCount}</td>
                     <td className="py-2 px-2 text-center">

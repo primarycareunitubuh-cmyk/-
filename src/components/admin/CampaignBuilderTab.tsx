@@ -218,6 +218,7 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
   // New/Edit Question Form
   const [qText, setQText] = useState('');
   const [qCategory, setQCategory] = useState<ServiceStation>('dimension_staff');
+  const [qCustomCategory, setQCustomCategory] = useState('');
   const [qType, setQType] = useState<QuestionType>('smiley5');
   const [qRequired, setQRequired] = useState(true);
   const [qDesc, setQDesc] = useState('');
@@ -364,24 +365,39 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
     e.preventDefault();
     if (!qText.trim()) return;
 
+    if (qCategory === 'dimension_other' && !qCustomCategory.trim()) {
+      alert('กรุณาระบุชื่อด้านการประเมินความพึงพอใจด้วยตนเอง');
+      return;
+    }
+
     const trimmedDesc = qDesc.trim();
+    const customCatName = (qCategory === 'dimension_other' || !SERVICE_DIMENSIONS_LIST.some(d => d.key === qCategory))
+      ? (qCustomCategory.trim() || 'ด้านอื่นๆ')
+      : undefined;
 
     if (editingQuestion) {
       // update
       updateCurrentCampaign(camp => ({
         ...camp,
-        questions: camp.questions.map(q =>
-          q.id === editingQuestion.id
-            ? {
-                ...q,
-                text: qText.trim(),
-                category: qCategory,
-                type: qType,
-                required: qRequired,
-                description: trimmedDesc,
-              }
-            : q
-        ),
+        questions: camp.questions.map(q => {
+          if (q.id === editingQuestion.id) {
+            const updatedQ: Question = {
+              ...q,
+              text: qText.trim(),
+              category: qCategory,
+              type: qType,
+              required: qRequired,
+              description: trimmedDesc,
+            };
+            if (customCatName) {
+              updatedQ.customCategoryName = customCatName;
+            } else {
+              delete updatedQ.customCategoryName;
+            }
+            return updatedQ;
+          }
+          return q;
+        }),
       }));
       setEditingQuestion(null);
       showToast('✓ บันทึกการแก้ไขข้อคำถามสำเร็จและซิงค์เรียลไทม์แล้ว', 'success');
@@ -395,6 +411,7 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
         required: qRequired,
         order: currentCampaign.questions.length + 1,
         description: trimmedDesc,
+        ...(customCatName ? { customCategoryName: customCatName } : {}),
       };
       updateCurrentCampaign(camp => ({
         ...camp,
@@ -407,6 +424,7 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
     setQText('');
     setQDesc('');
     setQCategory('dimension_staff');
+    setQCustomCategory('');
     setQType('smiley5');
     setQRequired(true);
   };
@@ -417,6 +435,10 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
     setQText(q.text);
     setQDesc(q.description || '');
     setQCategory(q.category);
+    setQCustomCategory(
+      q.customCategoryName || 
+      (q.category === 'dimension_other' ? '' : (!SERVICE_DIMENSIONS_LIST.some(d => d.key === q.category) ? q.category : ''))
+    );
     setQType(q.type);
     setQRequired(q.required);
   };
@@ -715,7 +737,11 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
         {/* Question List */}
         <div className="space-y-3">
           {currentCampaign.questions.map((question, index) => {
-            const stInfo = STATION_INFO[question.category] || { nameTh: question.category, color: 'slate' };
+            const isCustom = question.category === 'dimension_other' || Boolean(question.customCategoryName) || !STATION_INFO[question.category];
+            const displayCategoryName = question.customCategoryName || STATION_INFO[question.category]?.nameTh || question.category;
+            const categoryBadgeClass = isCustom 
+              ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' 
+              : (STATION_INFO[question.category]?.badgeClass || 'bg-slate-100 text-slate-700');
 
             return (
               <div
@@ -750,8 +776,9 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
                 {/* Content */}
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${stInfo.badgeClass || 'bg-slate-100 text-slate-700'}`}>
-                      {stInfo.nameTh}
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-md flex items-center gap-1 ${categoryBadgeClass}`}>
+                      {isCustom && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 inline-block"></span>}
+                      {displayCategoryName}
                     </span>
                     <span className="text-[11px] text-slate-500 font-medium bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
                       {question.type === 'smiley5'
@@ -1263,7 +1290,13 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
                   </label>
                   <select
                     value={qCategory}
-                    onChange={(e) => setQCategory(e.target.value as ServiceStation)}
+                    onChange={(e) => {
+                      const val = e.target.value as ServiceStation;
+                      setQCategory(val);
+                      if (val !== 'dimension_other' && !qCustomCategory) {
+                        setQCustomCategory('');
+                      }
+                    }}
                     className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 font-medium text-slate-800"
                   >
                     {SERVICE_DIMENSIONS_LIST.map((dim) => (
@@ -1292,6 +1325,28 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
                   </select>
                 </div>
               </div>
+
+              {/* Custom Dimension Input Field when "dimension_other" is selected */}
+              {(qCategory === 'dimension_other' || (!SERVICE_DIMENSIONS_LIST.some(d => d.key === qCategory) && qCategory)) && (
+                <div className="p-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300/80 rounded-xl space-y-1.5 shadow-xs">
+                  <label className="block font-bold text-amber-950 text-xs flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                    <span>ระบุชื่อด้านการประเมินความพึงพอใจด้วยตนเอง *</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={qCustomCategory}
+                    onChange={(e) => setQCustomCategory(e.target.value)}
+                    placeholder="เช่น ด้านการตรวจเอกซเรย์, ด้านการเจาะเลือด/ชันสูตร, ด้านทันตกรรม..."
+                    className="w-full p-2.5 bg-white border border-amber-300 rounded-xl text-slate-800 focus:ring-2 focus:ring-amber-500 font-medium text-xs sm:text-sm placeholder:text-slate-400"
+                  />
+                  <p className="text-[11px] text-amber-800 flex items-center gap-1">
+                    <span>💡</span>
+                    <span>ชื่อด้านที่ระบุนี้จะแสดงในแบบสอบถามของผู้รับบริการ และจำแนกสถิติผลการประเมินให้อัตโนมัติ</span>
+                  </p>
+                </div>
+              )}
 
               <div className="flex items-center gap-2 pt-1">
                 <input

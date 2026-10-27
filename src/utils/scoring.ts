@@ -26,7 +26,9 @@ export interface CampaignSummaryStats {
   isGoalMet: boolean;
   questionStats: QuestionStat[];
   stationStats: {
+    key?: string;
     station: ServiceStation;
+    rawCategory?: ServiceStation;
     stationName: string;
     avgScore: number;
     percentageScore: number;
@@ -156,15 +158,15 @@ export const calculateCampaignStats = (
 
   // Station breakdown (support custom dimension names)
   const getStationKey = (q: Question) => {
-    if ((q.category === 'dimension_other' || !STATION_INFO[q.category]) && q.customCategoryName) {
-      return `custom_${q.customCategoryName}`;
+    if ((q.category === 'dimension_other' || !STATION_INFO[q.category]) && q.customCategoryName && q.customCategoryName.trim()) {
+      return `custom_${q.customCategoryName.trim()}`;
     }
-    return q.category;
+    return q.category || 'dimension_other';
   };
 
   const getStationDisplayName = (q: Question) => {
-    if (q.customCategoryName) {
-      return q.customCategoryName;
+    if (q.customCategoryName && q.customCategoryName.trim()) {
+      return q.customCategoryName.trim();
     }
     return STATION_INFO[q.category]?.nameTh || q.category;
   };
@@ -192,7 +194,9 @@ export const calculateCampaignStats = (
     const info = STATION_INFO[sampleQ.category] || { nameTh: stationName, color: 'indigo' };
 
     return {
-      station: (key.startsWith('custom_') ? 'dimension_other' : key) as ServiceStation,
+      key,
+      station: key as ServiceStation,
+      rawCategory: sampleQ.category,
       stationName,
       avgScore: avg,
       percentageScore: percent,

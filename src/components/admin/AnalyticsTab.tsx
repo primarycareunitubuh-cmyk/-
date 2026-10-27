@@ -61,6 +61,39 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
 
   const totalCount = relevantResponses.length || 1;
 
+  // Age statistics calculation
+  const validAges = relevantResponses
+    .map(r => r.demographics?.age)
+    .filter((a): a is number => typeof a === 'number' && !isNaN(a) && a > 0);
+
+  const hasAgeData = validAges.length > 0;
+  const avgAge = hasAgeData ? (validAges.reduce((sum, a) => sum + a, 0) / validAges.length) : null;
+  const minAge = hasAgeData ? Math.min(...validAges) : null;
+  const maxAge = hasAgeData ? Math.max(...validAges) : null;
+
+  const ageGroupOrder = [
+    'ต่ำกว่า 20 ปี',
+    '20 - 35 ปี',
+    '36 - 50 ปี',
+    '51 - 60 ปี',
+    'มากกว่า 60 ปี',
+  ];
+
+  const ageGroupStats = relevantResponses.reduce<Record<string, number>>((acc, r) => {
+    let group = r.demographics?.ageRange;
+    if (!group && typeof r.demographics?.age === 'number') {
+      const a = r.demographics.age;
+      if (a < 20) group = 'ต่ำกว่า 20 ปี';
+      else if (a <= 35) group = '20 - 35 ปี';
+      else if (a <= 50) group = '36 - 50 ปี';
+      else if (a <= 60) group = '51 - 60 ปี';
+      else group = 'มากกว่า 60 ปี';
+    }
+    const key = group || 'ไม่ระบุ';
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
   const occupationStats = relevantResponses.reduce<Record<string, number>>((acc, r) => {
     const key = r.demographics?.occupation || 'ไม่ระบุ';
     acc[key] = (acc[key] || 0) + 1;
@@ -135,8 +168,8 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
               </option>
             ))}
             {/* Any custom dimensions present in this campaign */}
-            {Array.from(new Set(campaign.questions.filter(q => q.customCategoryName).map(q => q.customCategoryName!))).map(cName => (
-              <option key={cName} value={`custom:${cName}`}>
+            {Array.from(new Set(campaign.questions.map(q => q.customCategoryName?.trim()).filter((n): n is string => Boolean(n)))).map((cName, idx) => (
+              <option key={`filter_custom_${cName}_${idx}`} value={`custom:${cName}`}>
                 ด้านกำหนดเอง: {cName}
               </option>
             ))}
@@ -337,17 +370,17 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
           </div>
 
           <div className="space-y-4 mt-4">
-            {stats.stationStats.map((st) => {
+            {stats.stationStats.map((st, idx) => {
               const isAboveGoal = st.percentageScore >= campaign.targetGoalPercent;
-              const dimMeta = STATION_INFO[st.station];
-              const isCustom = st.station.startsWith('custom:') || st.station === 'dimension_other';
+              const dimMeta = STATION_INFO[st.station] || STATION_INFO[st.rawCategory || ''] || STATION_INFO['dimension_other'];
+              const isCustom = st.station.startsWith('custom') || st.station === 'dimension_other' || !STATION_INFO[st.station];
               const barGradient = dimMeta?.barGradient || (isCustom ? 'from-fuchsia-500 to-pink-600' : (isAboveGoal ? 'from-teal-500 to-emerald-500' : 'from-amber-400 to-orange-500'));
               const badgeClass = isCustom 
                 ? 'bg-fuchsia-50 text-fuchsia-800 border border-fuchsia-300 font-medium' 
                 : (dimMeta?.badgeClass || 'bg-slate-100 text-slate-700');
 
               return (
-                <div key={st.station} className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80">
+                <div key={`st_${st.station}_${st.stationName}_${idx}`} className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <span 
@@ -400,7 +433,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
               สถิติกลุ่มประชากรผู้รับบริการ (Demographic Analysis)
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              ข้อมูลจำแนกตามอาชีพ สิทธิการรักษา และประวัติการรับบริการตรวจสุขภาพ
+              ข้อมูลจำแนกตามอายุเป็นตัวเลข, อาชีพ, สิทธิการรักษา และประวัติการรับบริการตรวจสุขภาพ
             </p>
           </div>
           <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700">
@@ -408,7 +441,59 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          {/* 1. Age Demographics */}
+          <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/80 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-amber-600" />
+                  <span>สถิติอายุผู้รับบริการ</span>
+                </h4>
+                {hasAgeData && (
+                  <span className="text-[10px] text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 font-bold">
+                    เฉลี่ย {avgAge?.toFixed(1)} ปี
+                  </span>
+                )}
+              </div>
+
+              {/* Age Summary Stats */}
+              <div className="grid grid-cols-2 gap-2 mb-3 bg-white p-2 rounded-lg border border-slate-200/70 text-center">
+                <div>
+                  <span className="text-[10px] text-slate-400 block">อายุเฉลี่ย</span>
+                  <span className="text-xs font-bold text-amber-700">
+                    {hasAgeData ? `${avgAge?.toFixed(1)} ปี` : 'ตามช่วงอายุ'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 block">ต่ำสุด - สูงสุด</span>
+                  <span className="text-xs font-bold text-slate-800">
+                    {minAge !== null && maxAge !== null ? `${minAge} - ${maxAge} ปี` : '-'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Age Bracket Distribution */}
+              <div className="space-y-2 text-xs">
+                {ageGroupOrder.map((grp) => {
+                  const count = ageGroupStats[grp] || 0;
+                  const pct = Math.round((count / totalCount) * 100);
+                  return (
+                    <div key={grp} className="space-y-1">
+                      <div className="flex justify-between text-slate-600">
+                        <span className="truncate pr-1 font-medium">{grp}</span>
+                        <span className="font-semibold text-slate-800 shrink-0">{count} ({pct}%)</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
           {/* 1. Occupation */}
           <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/80">
             <h4 className="text-xs font-bold text-slate-800 mb-3 flex items-center gap-1.5">
@@ -532,7 +617,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
                 const isAbove = item.percentageScore >= campaign.targetGoalPercent;
 
                 return (
-                  <tr key={item.question.id} className="hover:bg-slate-50/70 transition">
+                  <tr key={`qstat_${item.question.id}_${idx}`} className="hover:bg-slate-50/70 transition">
                     <td className="py-3.5 px-3 text-center font-bold text-slate-400">
                       {idx + 1}
                     </td>

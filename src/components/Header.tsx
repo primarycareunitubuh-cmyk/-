@@ -44,8 +44,14 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-[0_4px_20px_-4px_rgba(15,23,42,0.06)]">
-      {/* Luxurious Top Gold-Emerald Hairline Accent */}
-      <div className="h-[3px] w-full bg-gradient-to-r from-emerald-700 via-amber-400 to-teal-700" />
+      {/* Luxurious Top Signature Stripe matching active activity */}
+      <div 
+        className={`h-[3.5px] w-full transition-colors duration-500 ${
+          currentView === 'survey' && activeCampaign 
+            ? getCampaignTheme(activeCampaign).cardTopStripe 
+            : 'bg-gradient-to-r from-emerald-700 via-amber-400 to-teal-700'
+        }`} 
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20 gap-3">

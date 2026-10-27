@@ -155,6 +155,7 @@ export default function App() {
     if (!activeCampaign) return;
 
     const sampleGenders: ('ชาย' | 'หญิง' | 'ไม่ระบุ')[] = ['ชาย', 'หญิง', 'หญิง', 'ชาย', 'หญิง'];
+    const sampleNumericAges = [28, 42, 55, 31, 64];
     const sampleAges: ('20 - 35 ปี' | '36 - 50 ปี' | '51 - 60 ปี' | 'มากกว่า 60 ปี')[] = [
       '20 - 35 ปี',
       '36 - 50 ปี',
@@ -219,6 +220,7 @@ export default function App() {
         submittedAt: new Date(Date.now() - idx * 3600 * 1000 * 3).toISOString(),
         demographics: {
           gender: sampleGenders[idx % sampleGenders.length],
+          age: sampleNumericAges[idx % sampleNumericAges.length],
           ageRange: sampleAges[idx % sampleAges.length],
           occupation: sampleOccupations[idx % sampleOccupations.length],
           coverage: sampleCoverages[idx % sampleCoverages.length],

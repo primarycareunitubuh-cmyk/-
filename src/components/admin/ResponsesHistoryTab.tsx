@@ -79,7 +79,7 @@ export const ResponsesHistoryTab: React.FC<ResponsesHistoryTabProps> = ({
       'รหัสแบบประเมิน',
       'วันที่และเวลา',
       'เพศ',
-      'ช่วงอายุ',
+      'อายุ (ปี)',
       'อาชีพ',
       'สิทธิการรักษา',
       'ประวัติการรับบริการ',
@@ -101,11 +101,15 @@ export const ResponsesHistoryTab: React.FC<ResponsesHistoryTabProps> = ({
         return `"${displayVal.replace(/"/g, '""')}"`;
       });
 
+      const ageDisplay = r.demographics?.age !== undefined
+        ? `${r.demographics.age} ปี`
+        : (r.demographics?.ageRange || '-');
+
       return [
         `"${r.id}"`,
         `"${new Date(r.submittedAt).toLocaleString('th-TH')}"`,
         `"${r.demographics?.gender || '-'}"`,
-        `"${r.demographics?.ageRange || '-'}"`,
+        `"${ageDisplay}"`,
         `"${r.demographics?.occupation || '-'}"`,
         `"${r.demographics?.coverage || '-'}"`,
         `"${r.demographics?.visitHistory || '-'}"`,
@@ -258,7 +262,7 @@ export const ResponsesHistoryTab: React.FC<ResponsesHistoryTabProps> = ({
 
                       <td className="py-3 px-3 whitespace-nowrap">
                         <div className="text-slate-800 font-medium">
-                          {item.demographics?.gender || 'ไม่ระบุเพศ'} • {item.demographics?.ageRange || '-'}
+                          {item.demographics?.gender || 'ไม่ระบุเพศ'} • {item.demographics?.age !== undefined ? `${item.demographics.age} ปี` : (item.demographics?.ageRange || '-')}
                         </div>
                         <div className="text-[11px] text-teal-700 font-semibold">
                           {item.demographics?.occupation || '-'}
@@ -351,8 +355,17 @@ export const ResponsesHistoryTab: React.FC<ResponsesHistoryTabProps> = ({
                   <strong className="text-slate-800">{selectedResponse.demographics?.gender || '-'}</strong>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">ช่วงอายุ:</span>
-                  <strong className="text-slate-800">{selectedResponse.demographics?.ageRange || '-'}</strong>
+                  <span className="text-slate-400 block text-[11px]">อายุ:</span>
+                  <strong className="text-slate-800">
+                    {selectedResponse.demographics?.age !== undefined
+                      ? `${selectedResponse.demographics.age} ปี`
+                      : (selectedResponse.demographics?.ageRange || '-')}
+                    {selectedResponse.demographics?.age !== undefined && selectedResponse.demographics?.ageRange && (
+                      <span className="text-[11px] text-slate-400 font-normal ml-1">
+                        ({selectedResponse.demographics.ageRange})
+                      </span>
+                    )}
+                  </strong>
                 </div>
                 <div>
                   <span className="text-slate-400 block text-[11px]">อาชีพ:</span>

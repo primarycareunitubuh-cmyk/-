@@ -49,6 +49,15 @@ const SMILEY_OPTIONS = [
   { value: 5, label: 'มากที่สุด', sublabel: '5 ดาว', icon: Sparkles, color: 'text-emerald-600', bg: 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-700', activeBg: 'bg-emerald-600 text-white shadow-emerald-600/30' },
 ];
 
+export const getAgeRangeLabel = (age?: number): string => {
+  if (age === undefined || isNaN(age)) return 'ไม่ระบุ';
+  if (age < 20) return 'ต่ำกว่า 20 ปี';
+  if (age <= 35) return '20 - 35 ปี';
+  if (age <= 50) return '36 - 50 ปี';
+  if (age <= 60) return '51 - 60 ปี';
+  return 'มากกว่า 60 ปี';
+};
+
 export const ClientSurveyView: React.FC<ClientSurveyViewProps> = ({
   campaign,
   onSubmitSurvey,
@@ -59,6 +68,7 @@ export const ClientSurveyView: React.FC<ClientSurveyViewProps> = ({
   const [answers, setAnswers] = useState<Record<string, number | string>>({});
   const [demographics, setDemographics] = useState<RespondentDemographics>({
     gender: 'ไม่ระบุ',
+    age: 35,
     ageRange: '20 - 35 ปี',
     occupation: 'อาจารย์/พนักงานมหาวิทยาลัยอุบล',
     coverage: 'ข้าราชการ/กรมบัญชีกลาง',
@@ -156,7 +166,8 @@ export const ClientSurveyView: React.FC<ClientSurveyViewProps> = ({
     setErrorMessage(null);
     setDemographics({
       gender: 'ไม่ระบุ',
-      ageRange: '20 - 35 ปี',
+      age: undefined,
+      ageRange: undefined,
       occupation: 'อาจารย์/พนักงานมหาวิทยาลัยอุบล',
       coverage: 'ข้าราชการ/กรมบัญชีกลาง',
       visitHistory: 'รับบริการตรวจสุขภาพมากกว่า 1 ครั้ง',
@@ -224,97 +235,110 @@ export const ClientSurveyView: React.FC<ClientSurveyViewProps> = ({
 
   if (submitted) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-12 sm:py-16">
-        <div className="bg-white rounded-3xl p-8 sm:p-12 shadow-xl border border-teal-100 text-center relative overflow-hidden">
-          <div className="absolute -right-16 -top-16 w-48 h-48 bg-teal-50 rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute -left-16 -bottom-16 w-48 h-48 bg-emerald-50 rounded-full blur-2xl pointer-events-none" />
+      <div className={`min-h-screen ${theme.pageBgGradient} py-12 sm:py-16 relative overflow-hidden flex items-center justify-center transition-colors duration-500`}>
+        {/* Dynamic Ambient Color Orbs */}
+        <div className={`fixed -right-24 top-16 w-96 h-96 rounded-full blur-3xl pointer-events-none ${theme.pageAmbientGlow1} -z-0`} />
+        <div className={`fixed -left-24 bottom-16 w-96 h-96 rounded-full blur-3xl pointer-events-none ${theme.pageAmbientGlow2} -z-0`} />
 
-          <div className="w-20 h-20 bg-gradient-to-tr from-emerald-500 to-teal-500 rounded-3xl mx-auto flex items-center justify-center text-white shadow-lg shadow-teal-500/30 mb-6 animate-bounce">
-            <CheckCircle2 className="w-12 h-12" />
-          </div>
+        <div className="max-w-2xl w-full mx-auto px-4 relative z-10">
+          <div className={`bg-white/95 backdrop-blur-xs rounded-3xl p-8 sm:p-12 shadow-xl ${theme.cardBorder} text-center relative overflow-hidden`}>
+            {/* Top Distinct Activity Signature Stripe */}
+            <div className={`h-2.5 w-full ${theme.cardTopStripe} absolute top-0 left-0`} />
+            <div className={`absolute -right-16 -top-16 w-48 h-48 ${theme.pageAmbientGlow1} rounded-full blur-2xl pointer-events-none`} />
+            <div className={`absolute -left-16 -bottom-16 w-48 h-48 ${theme.pageAmbientGlow2} rounded-full blur-2xl pointer-events-none`} />
 
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2 font-['Prompt']">
-            ขอบพระคุณสำหรับความคิดเห็นของท่าน
-          </h2>
-          <p className="text-sm sm:text-base text-slate-600 max-w-md mx-auto mb-6">
-            {campaign.thankYouMessage || 'ข้อมูลการประเมินของท่านได้รับการบันทึกสู่ระบบแบบเรียลไทม์เพื่อพัฒนาคุณภาพบริการตรวจสุขภาพอย่างต่อเนื่อง'}
-          </p>
-
-          {/* Score Badge */}
-          <div className="inline-flex flex-col items-center p-4 sm:p-5 rounded-2xl bg-teal-50/80 border border-teal-200/80 mb-8 min-w-[220px]">
-            <span className="text-xs font-semibold text-teal-800 uppercase tracking-wider">
-              คะแนนความพึงพอใจการประเมินของท่าน
-            </span>
-            <div className="flex items-baseline gap-1 mt-1 text-teal-900 font-extrabold text-3xl sm:text-4xl">
-              <span>{submittedScore.toFixed(1)}%</span>
-              <span className="text-xs text-teal-700 font-medium">ร้อยละ</span>
+            <div className={`w-20 h-20 bg-gradient-to-tr ${theme.progressGradient} rounded-3xl mx-auto flex items-center justify-center text-white shadow-lg mb-6 animate-bounce`}>
+              <CheckCircle2 className="w-12 h-12" />
             </div>
-            <span className="text-xs text-teal-700 mt-1 flex items-center gap-1">
-              <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
-              กิจกรรม: {campaign.title}
-            </span>
-          </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button
-              onClick={handleResetForNextRespondent}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-white bg-teal-600 hover:bg-teal-700 shadow-md shadow-teal-600/30 transition transform active:scale-98 text-sm"
-            >
-              <RefreshCw className="w-4 h-4" />
-              <span>ทำแบบประเมินท่านถัดไป (กิจกรรมเดิม)</span>
-            </button>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2 font-['Prompt']">
+              ขอบพระคุณสำหรับความคิดเห็นของท่าน
+            </h2>
+            <p className="text-sm sm:text-base text-slate-600 max-w-md mx-auto mb-6">
+              {campaign.thankYouMessage || 'ข้อมูลการประเมินของท่านได้รับการบันทึกสู่ระบบแบบเรียลไทม์เพื่อพัฒนาคุณภาพบริการตรวจสุขภาพอย่างต่อเนื่อง'}
+            </p>
 
-            {onBackToSelect && (
+            {/* Score Badge */}
+            <div className={`inline-flex flex-col items-center p-4 sm:p-5 rounded-2xl border mb-8 min-w-[220px] ${theme.periodBg}`}>
+              <span className={`text-xs font-semibold uppercase tracking-wider ${theme.accentTextColor}`}>
+                คะแนนความพึงพอใจการประเมินของท่าน
+              </span>
+              <div className={`flex items-baseline gap-1 mt-1 font-extrabold text-3xl sm:text-4xl ${theme.accentTextColor}`}>
+                <span>{submittedScore.toFixed(1)}%</span>
+                <span className="text-xs font-medium opacity-80">ร้อยละ</span>
+              </div>
+              <span className={`text-xs mt-1 flex items-center gap-1 font-medium ${theme.accentTextColor}`}>
+                <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
+                กิจกรรม: {campaign.title}
+              </span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <button
-                onClick={onBackToSelect}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition text-sm"
+                onClick={handleResetForNextRespondent}
+                className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-white ${theme.btnBg} shadow-md transition transform active:scale-98 text-sm`}
               >
-                <LayoutGrid className="w-4 h-4 text-slate-500" />
-                <span>กลับสู่หน้าเลือกกิจกรรม</span>
+                <RefreshCw className="w-4 h-4" />
+                <span>ทำแบบประเมินท่านถัดไป (กิจกรรมเดิม)</span>
               </button>
+
+              {onBackToSelect && (
+                <button
+                  onClick={onBackToSelect}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition text-sm"
+                >
+                  <LayoutGrid className="w-4 h-4 text-slate-500" />
+                  <span>กลับสู่หน้าเลือกกิจกรรม</span>
+                </button>
+              )}
+            </div>
+            
+            {isKioskMode && (
+              <p className="text-xs text-slate-400 mt-4">
+                * สำหรับโหมดตู้คีออสก์หรือแท็บเล็ตจุดพักคอย
+              </p>
             )}
           </div>
-          
-          {isKioskMode && (
-            <p className="text-xs text-slate-400 mt-4">
-              * สำหรับโหมดตู้คีออสก์หรือแท็บเล็ตจุดพักคอย
-            </p>
-          )}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 sm:py-10">
-      
-      {/* Campaign Banner Header with Distinct Activity Color Scheme */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200/90 mb-6 relative overflow-hidden">
-        {/* Top Activity Signature Color Stripe */}
-        <div className={`h-1.5 w-full bg-gradient-to-r ${theme.progressGradient} absolute top-0 left-0`} />
-        <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50/50 rounded-bl-full -z-0 pointer-events-none" />
-        
-        <div className="relative z-10">
-          {/* Back to activity selection button & Mode indicator */}
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-            {onBackToSelect ? (
-              <button
-                type="button"
-                onClick={onBackToSelect}
-                className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 bg-slate-100/90 hover:bg-slate-200 px-3.5 py-1.5 rounded-xl border border-slate-200 transition shadow-2xs group"
-                title="กลับสู่หน้าแรกเพื่อเลือกกิจกรรมอื่น"
-              >
-                <ArrowLeft className="w-3.5 h-3.5 text-slate-600 group-hover:-translate-x-0.5 transition-transform" />
-                <span>← เปลี่ยนกิจกรรมตรวจสุขภาพ (กลับหน้าแรก)</span>
-              </button>
-            ) : <div />}
+    <div className={`min-h-screen ${theme.pageBgGradient} py-6 sm:py-10 transition-colors duration-500 relative overflow-hidden`}>
+      {/* Dynamic Ambient Background Color Orbs */}
+      <div className={`fixed -right-28 top-12 w-96 h-96 rounded-full blur-3xl pointer-events-none ${theme.pageAmbientGlow1} -z-0`} />
+      <div className={`fixed -left-28 bottom-12 w-96 h-96 rounded-full blur-3xl pointer-events-none ${theme.pageAmbientGlow2} -z-0`} />
 
-            {/* Patient Mode Badge: Eliminates confusion for both patient and staff */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300/80 shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ring-2 ring-emerald-200" />
-              <span>โหมดผู้รับบริการ (Patient Evaluation)</span>
+      <div className="max-w-3xl mx-auto px-4 relative z-10">
+        
+        {/* Campaign Banner Header with Distinct Activity Color Scheme */}
+        <div className={`bg-white/95 backdrop-blur-xs rounded-3xl p-6 sm:p-8 shadow-sm ${theme.cardBorder} mb-6 relative overflow-hidden`}>
+          {/* Top Activity Signature Color Stripe */}
+          <div className={`h-2.5 w-full ${theme.cardTopStripe} absolute top-0 left-0`} />
+          <div className={`absolute top-0 right-0 w-64 h-64 ${theme.pageAmbientGlow1} rounded-bl-full -z-0 pointer-events-none`} />
+          
+          <div className="relative z-10">
+            {/* Back to activity selection button & Mode indicator */}
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+              {onBackToSelect ? (
+                <button
+                  type="button"
+                  onClick={onBackToSelect}
+                  className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 bg-slate-100/90 hover:bg-slate-200 px-3.5 py-1.5 rounded-xl border border-slate-200 transition shadow-2xs group"
+                  title="กลับสู่หน้าแรกเพื่อเลือกกิจกรรมอื่น"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5 text-slate-600 group-hover:-translate-x-0.5 transition-transform" />
+                  <span>← เปลี่ยนกิจกรรมตรวจสุขภาพ (กลับหน้าแรก)</span>
+                </button>
+              ) : <div />}
+
+              {/* Patient Mode Badge with Activity Signature Colors */}
+              <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold shadow-2xs ${theme.badgeBg}`}>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ring-2 ring-emerald-200" />
+                <span>โหมดผู้รับบริการ (Patient Evaluation)</span>
+              </div>
             </div>
-          </div>
 
           <div className="flex flex-wrap items-center gap-2 mb-3">
             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-2xs ${theme.badgeBg}`}>
@@ -370,20 +394,41 @@ export const ClientSurveyView: React.FC<ClientSurveyViewProps> = ({
                 </div>
               </div>
 
-              {/* 2. ช่วงอายุ */}
+              {/* 2. อายุ (ระบุเป็นตัวเลข) */}
               <div className="bg-slate-50/80 p-2.5 rounded-xl border border-slate-200/70">
-                <label className="font-medium text-slate-600 block mb-1.5">ช่วงอายุ:</label>
-                <select
-                  value={demographics.ageRange}
-                  onChange={(e) => setDemographics((d) => ({ ...d, ageRange: e.target.value as any }))}
-                  className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
-                >
-                  <option value="ต่ำกว่า 20 ปี">ต่ำกว่า 20 ปี</option>
-                  <option value="20 - 35 ปี">20 - 35 ปี</option>
-                  <option value="36 - 50 ปี">36 - 50 ปี</option>
-                  <option value="51 - 60 ปี">51 - 60 ปี</option>
-                  <option value="มากกว่า 60 ปี">มากกว่า 60 ปี</option>
-                </select>
+                <label className="font-medium text-slate-600 block mb-1.5 flex items-center justify-between">
+                  <span className="flex items-center gap-1">
+                    <User className="w-3.5 h-3.5 text-teal-600" />
+                    <span>อายุ (ปี):</span>
+                  </span>
+                  {demographics.age !== undefined && !isNaN(demographics.age) && (
+                    <span className="text-[10px] text-teal-800 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200 font-medium">
+                      {getAgeRangeLabel(demographics.age)}
+                    </span>
+                  )}
+                </label>
+                <div className="relative flex items-center">
+                  <input
+                    type="number"
+                    min={1}
+                    max={120}
+                    value={demographics.age !== undefined ? demographics.age : ''}
+                    onChange={(e) => {
+                      const raw = e.target.value.trim();
+                      const val = raw === '' ? undefined : parseInt(raw, 10);
+                      setDemographics((d) => ({
+                        ...d,
+                        age: val,
+                        ageRange: val !== undefined ? getAgeRangeLabel(val) : undefined,
+                      }));
+                    }}
+                    placeholder="กรอกอายุเป็นตัวเลข เช่น 35"
+                    className="w-full bg-white border border-slate-200 rounded-lg pl-3 pr-8 py-1.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:ring-1 focus:ring-teal-500 focus:border-teal-500 shadow-2xs"
+                  />
+                  <span className="absolute right-2.5 text-xs text-slate-400 pointer-events-none font-medium">
+                    ปี
+                  </span>
+                </div>
               </div>
 
               {/* 3. อาชีพ */}
@@ -500,7 +545,7 @@ export const ClientSurveyView: React.FC<ClientSurveyViewProps> = ({
 
           return (
             <div
-              key={question.id}
+              key={`survey_q_${question.id}_${index}`}
               id={`q-box-${question.id}`}
               className={`bg-white rounded-2xl p-5 sm:p-7 shadow-xs border transition-all ${
                 isAnswered
@@ -739,9 +784,8 @@ export const ClientSurveyView: React.FC<ClientSurveyViewProps> = ({
             <span>ส่งแบบประเมินความพึงพอใจ</span>
           </button>
         </div>
-
       </form>
-
     </div>
-  );
+  </div>
+);
 };

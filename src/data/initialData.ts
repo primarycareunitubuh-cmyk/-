@@ -432,6 +432,7 @@ export const INITIAL_RESPONSES: SurveySubmission[] = [
     submittedAt: '2026-10-04T08:45:00Z',
     demographics: {
       gender: 'หญิง',
+      age: 42,
       ageRange: '36 - 50 ปี',
       occupation: 'อาจารย์/พนักงานมหาวิทยาลัยอุบล',
       coverage: 'ข้าราชการ/กรมบัญชีกลาง',
@@ -459,6 +460,7 @@ export const INITIAL_RESPONSES: SurveySubmission[] = [
     submittedAt: '2026-10-04T09:15:00Z',
     demographics: {
       gender: 'ชาย',
+      age: 28,
       ageRange: '20 - 35 ปี',
       occupation: 'อาจารย์/พนักงานมหาวิทยาลัยอุบล',
       coverage: 'ประกันสังคม',
@@ -486,6 +488,7 @@ export const INITIAL_RESPONSES: SurveySubmission[] = [
     submittedAt: '2026-10-04T10:00:00Z',
     demographics: {
       gender: 'หญิง',
+      age: 56,
       ageRange: '51 - 60 ปี',
       occupation: 'ข้าราชการ/พนักงานรัฐ',
       coverage: 'ข้าราชการ/กรมบัญชีกลาง',
@@ -513,6 +516,7 @@ export const INITIAL_RESPONSES: SurveySubmission[] = [
     submittedAt: '2026-10-04T10:30:00Z',
     demographics: {
       gender: 'ชาย',
+      age: 39,
       ageRange: '36 - 50 ปี',
       occupation: 'พนักงานเอกชน',
       coverage: 'ประกันสังคม',
@@ -540,6 +544,7 @@ export const INITIAL_RESPONSES: SurveySubmission[] = [
     submittedAt: '2026-10-04T11:10:00Z',
     demographics: {
       gender: 'หญิง',
+      age: 23,
       ageRange: '20 - 35 ปี',
       occupation: 'นักเรียน/นักศึกษา',
       coverage: 'หลักประกันสุขภาพแห่งชาติ(บัตรทอง)',
@@ -567,6 +572,7 @@ export const INITIAL_RESPONSES: SurveySubmission[] = [
     submittedAt: '2026-10-03T09:20:00Z',
     demographics: {
       gender: 'ชาย',
+      age: 65,
       ageRange: 'มากกว่า 60 ปี',
       occupation: 'ข้าราชการ/พนักงานรัฐ',
       coverage: 'ข้าราชการ/กรมบัญชีกลาง',
@@ -594,6 +600,7 @@ export const INITIAL_RESPONSES: SurveySubmission[] = [
     submittedAt: '2026-10-03T10:45:00Z',
     demographics: {
       gender: 'หญิง',
+      age: 47,
       ageRange: '36 - 50 ปี',
       occupation: 'ธุรกิจส่วนตัว/ค้าขาย',
       coverage: 'ชำระเงินเอง',
@@ -621,6 +628,7 @@ export const INITIAL_RESPONSES: SurveySubmission[] = [
     submittedAt: '2026-10-02T08:50:00Z',
     demographics: {
       gender: 'ชาย',
+      age: 32,
       ageRange: '20 - 35 ปี',
       occupation: 'อาจารย์/พนักงานมหาวิทยาลัยอุบล',
       coverage: 'ประกันสังคม',
@@ -648,6 +656,7 @@ export const INITIAL_RESPONSES: SurveySubmission[] = [
     submittedAt: '2026-10-01T13:30:00Z',
     demographics: {
       gender: 'หญิง',
+      age: 45,
       ageRange: '36 - 50 ปี',
       occupation: 'รัฐวิสาหกิจ',
       coverage: 'รัฐวิสาหกิจ',
@@ -671,6 +680,7 @@ export const INITIAL_RESPONSES: SurveySubmission[] = [
     submittedAt: '2026-10-01T14:15:00Z',
     demographics: {
       gender: 'ชาย',
+      age: 29,
       ageRange: '20 - 35 ปี',
       occupation: 'อปท',
       coverage: 'อปท',

@@ -125,8 +125,8 @@ export const PrintReportModal: React.FC<PrintReportModalProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
-                {stats.stationStats.map((st) => (
-                  <tr key={st.station}>
+                {stats.stationStats.map((st, idx) => (
+                  <tr key={`print_st_${st.station}_${st.stationName}_${idx}`}>
                     <td className="py-2 px-3 font-medium">{st.stationName}</td>
                     <td className="py-2 px-3 text-center">{st.questionCount}</td>
                     <td className="py-2 px-3 text-center">{st.avgScore.toFixed(2)}</td>
@@ -162,7 +162,7 @@ export const PrintReportModal: React.FC<PrintReportModalProps> = ({
               </thead>
               <tbody className="divide-y divide-slate-200">
                 {stats.questionStats.map((q, idx) => (
-                  <tr key={q.question.id}>
+                  <tr key={`print_q_${q.question.id}_${idx}`}>
                     <td className="py-2 px-2 text-center font-bold text-slate-500">{idx + 1}</td>
                     <td className="py-2 px-3 font-medium">{q.question.text}</td>
                     <td className="py-2 px-3 text-slate-600">

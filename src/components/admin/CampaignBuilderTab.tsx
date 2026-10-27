@@ -403,7 +403,7 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
     } else {
       // create new
       const newQuestion: Question = {
-        id: `q_${Date.now()}`,
+        id: `q_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
         text: qText.trim(),
         category: qCategory,
         type: qType,
@@ -475,7 +475,7 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
   // Add from preset
   const handleAddPreset = (preset: typeof PRESET_QUESTIONS[0]) => {
     const newQ: Question = {
-      id: `q_${Date.now()}`,
+      id: `q_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       text: preset.text,
       category: preset.category,
       type: preset.type,
@@ -538,34 +538,33 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
           {campaigns.map((camp) => {
             const isCurrent = camp.id === currentCampaign.id;
             const isActive = camp.status === 'active';
+            const campTheme = getCampaignTheme(camp);
 
             return (
               <div
                 key={camp.id}
                 onClick={() => onSelectCampaign(camp.id)}
-                className={`p-4 sm:p-5 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between ${
+                className={`p-4 sm:p-5 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between relative overflow-hidden bg-gradient-to-br ${campTheme.cardBgGradient} ${
                   isCurrent
-                    ? 'border-emerald-600 bg-emerald-50/30 ring-2 ring-emerald-500/20 shadow-md'
-                    : 'border-slate-200 bg-white hover:border-emerald-300 hover:shadow-sm'
+                    ? `${campTheme.cardBorder} ring-2 ring-slate-900/10 shadow-md`
+                    : 'border-slate-200/80 hover:border-slate-300 hover:shadow-sm'
                 }`}
               >
-                <div>
+                {/* Top Theme Accent Bar */}
+                <div className={`h-1.5 w-full ${campTheme.cardTopStripe} absolute top-0 left-0`} />
+
+                <div className="pt-1">
                   {/* Top Badges Row */}
                   <div className="flex items-center justify-between gap-2 mb-2.5">
-                    {(() => {
-                      const campTheme = getCampaignTheme(camp);
-                      return (
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="w-2.5 h-2.5 rounded-full shrink-0 ring-1 ring-slate-300" style={{ backgroundColor: campTheme.hex }} />
-                          <span className={`text-[11px] font-bold font-mono px-2.5 py-0.5 rounded-md border ${campTheme.badgeBg}`}>
-                            {camp.code}
-                          </span>
-                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${campTheme.chipClass}`}>
-                            {campTheme.name.split(' ')[0]}
-                          </span>
-                        </div>
-                      );
-                    })()}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0 ring-1 ring-slate-300" style={{ backgroundColor: campTheme.hex }} />
+                      <span className={`text-[11px] font-bold font-mono px-2.5 py-0.5 rounded-md border ${campTheme.badgeBg}`}>
+                        {camp.code}
+                      </span>
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${campTheme.chipClass}`}>
+                        {campTheme.name.split(' ')[0]}
+                      </span>
+                    </div>
 
                     <div className="flex items-center gap-1.5">
                       {/* Status Badge */}
@@ -755,7 +754,7 @@ export const CampaignBuilderTab: React.FC<CampaignBuilderTabProps> = ({
 
             return (
               <div
-                key={question.id}
+                key={`q_item_${question.id}_${index}`}
                 className="p-4 rounded-xl border border-slate-200 bg-white hover:border-slate-300 transition flex items-start justify-between gap-3 group"
               >
                 {/* Order & Drag Controls */}

@@ -126,21 +126,27 @@ export const CampaignSelectorLanding: React.FC<CampaignSelectorLandingProps> = (
               <div
                 key={camp.id}
                 onClick={handleCardClick}
-                className={`group relative bg-gradient-to-b ${theme.cardBgGradient} rounded-3xl p-6 sm:p-7 border-2 border-slate-200/80 shadow-xs hover:shadow-xl hover:border-slate-300 transition-all duration-300 cursor-pointer flex flex-col justify-between ${
-                  statusCheck.isOpen ? `${theme.borderHover} hover:-translate-y-1.5` : 'opacity-90 hover:border-slate-300'
+                className={`group relative bg-gradient-to-br ${theme.cardBgGradient} rounded-3xl p-6 sm:p-7 ${theme.cardBorder} transition-all duration-300 cursor-pointer flex flex-col justify-between overflow-hidden ${
+                  statusCheck.isOpen ? `${theme.borderHover} hover:-translate-y-2` : 'opacity-90 hover:border-slate-300'
                 }`}
               >
-                <div>
+                {/* Top Distinct Activity Signature Stripe */}
+                <div className={`h-2.5 w-full ${theme.cardTopStripe} absolute top-0 left-0`} />
+
+                {/* Ambient Radial Glow in card corner */}
+                <div className={`absolute -top-12 -right-12 w-48 h-48 rounded-full blur-2xl pointer-events-none ${theme.cardGlow}`} />
+
+                <div className="relative z-10 pt-1">
                   {/* Top Badges */}
-                  <div className="flex items-center justify-between gap-2 mb-3.5">
+                  <div className="flex items-center justify-between gap-2 mb-4">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <div className={`w-11 h-11 rounded-2xl flex items-center justify-center border ${theme.iconBg} shadow-xs`}>
+                      <div className={`w-11 h-11 rounded-2xl flex items-center justify-center border shadow-xs ${theme.iconBg}`}>
                         {getCampaignIcon(camp)}
                       </div>
-                      <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full border shadow-2xs ${theme.badgeBg}`}>
+                      <span className={`text-[11px] px-2.5 py-1 rounded-full border shadow-2xs ${theme.badgeBg}`}>
                         {camp.code}
                       </span>
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${theme.chipClass}`}>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-md border ${theme.chipClass}`}>
                         {theme.name.split(' ')[0]}
                       </span>
                     </div>
@@ -153,19 +159,19 @@ export const CampaignSelectorLanding: React.FC<CampaignSelectorLandingProps> = (
                   </div>
 
                   {/* Campaign Title */}
-                  <h3 className="text-base sm:text-lg font-bold text-slate-900 font-['Prompt'] group-hover:text-emerald-900 transition-colors line-clamp-2 mb-1.5">
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 font-['Prompt'] group-hover:text-slate-950 transition-colors line-clamp-2 mb-2">
                     {camp.title}
                   </h3>
 
-                  {/* Target Unit */}
-                  <div className="flex items-center gap-1.5 text-xs text-emerald-800/80 font-medium mb-2.5">
-                    <Building className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  {/* Target Unit with Theme Accents */}
+                  <div className={`flex items-center gap-1.5 text-xs font-semibold mb-2.5 ${theme.accentTextColor}`}>
+                    <Building className={`w-3.5 h-3.5 shrink-0 ${theme.accentIconColor}`} />
                     <span className="truncate">{camp.targetUnit}</span>
                   </div>
 
-                  {/* Scheduled Period */}
-                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mb-3 bg-slate-50/90 px-2.5 py-1 rounded-lg border border-slate-200/70">
-                    <Calendar className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  {/* Scheduled Period with matched theme background */}
+                  <div className={`flex items-center gap-1.5 text-[11px] font-medium mb-3 px-2.5 py-1 rounded-lg border shadow-2xs ${theme.periodBg}`}>
+                    <Calendar className={`w-3.5 h-3.5 shrink-0 ${theme.accentIconColor}`} />
                     <span className="truncate">ช่วงเวลา: {formatThaiDate(camp.startDate)} - {formatThaiDate(camp.endDate)}</span>
                   </div>
 
@@ -176,13 +182,13 @@ export const CampaignSelectorLanding: React.FC<CampaignSelectorLandingProps> = (
                 </div>
 
                 {/* Footer Info & Action Button */}
-                <div className="pt-4 border-t border-slate-100 space-y-3">
-                  <div className="flex items-center justify-between text-xs text-slate-500">
-                    <span className="flex items-center gap-1 font-medium text-emerald-900/80">
-                      <ClipboardCheck className="w-3.5 h-3.5 text-emerald-600" />
+                <div className="pt-4 border-t border-slate-200/60 space-y-3 relative z-10">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className={`flex items-center gap-1 font-semibold ${theme.accentTextColor}`}>
+                      <ClipboardCheck className={`w-3.5 h-3.5 ${theme.accentIconColor}`} />
                       <span>{questionCount} ข้อคำถาม</span>
                     </span>
-                    <span className="flex items-center gap-1 text-slate-400">
+                    <span className="flex items-center gap-1 text-slate-500 font-medium">
                       <Clock className="w-3.5 h-3.5 text-slate-400" />
                       <span>~1-2 นาที</span>
                     </span>
@@ -191,10 +197,10 @@ export const CampaignSelectorLanding: React.FC<CampaignSelectorLandingProps> = (
                   {statusCheck.isOpen ? (
                     <button
                       type="button"
-                      className={`w-full py-3 px-4 rounded-xl text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition shadow-md group-hover:shadow-lg ${theme.btnBg}`}
+                      className={`w-full py-3 px-4 rounded-xl text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition shadow-md hover:shadow-xl active:scale-98 ${theme.btnBg}`}
                     >
                       <span>เข้าทำแบบประเมิน</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
                     </button>
                   ) : (
                     <button

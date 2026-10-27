@@ -86,7 +86,8 @@ export type VisitHistoryType =
 
 export interface RespondentDemographics {
   gender?: 'ชาย' | 'หญิง' | 'ไม่ระบุ';
-  ageRange?: 'ต่ำกว่า 20 ปี' | '20 - 35 ปี' | '36 - 50 ปี' | '51 - 60 ปี' | 'มากกว่า 60 ปี';
+  age?: number; // อายุจริงของผู้รับบริการ (ปี)
+  ageRange?: 'ต่ำกว่า 20 ปี' | '20 - 35 ปี' | '36 - 50 ปี' | '51 - 60 ปี' | 'มากกว่า 60 ปี' | string;
   occupation?: OccupationType | string;
   coverage?: HealthCoverageType | string;
   visitHistory?: VisitHistoryType | string;
